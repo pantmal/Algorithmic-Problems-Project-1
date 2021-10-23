@@ -33,8 +33,8 @@ public:
 VectorElement::VectorElement(int dimensions, std::string fileLine)
 {
     int counter = 0;
-    arrayVectorElement = new int[size];
     size = dimensions;
+    arrayVectorElement = new int[size];
     std::stringstream sso(fileLine);
     sso >> id;
     while (sso >> id)
