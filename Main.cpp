@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <typeinfo>
 #include <cstdio>
+
 #include "VectorElement.h"
 
 #define FILE_NAME "input_b_id"
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
     how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
     //how_many_rows++;
     //TODO: Find out the shit with rows
+    //TODO: Minimize the loops
     myfile.close();
     myfile.clear();
     myfile.open(FILE_NAME);
