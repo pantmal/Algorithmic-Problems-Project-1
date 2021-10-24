@@ -7,6 +7,8 @@
 #include <sstream>
 #include <fstream>
 
+std::ofstream myLogFile;
+
 class VectorElement
 {
 public:
@@ -16,9 +18,10 @@ public:
 
 public:
     VectorElement(int, std::string);
+    ~VectorElement();
     void displayId()
     {
-        std::cout << "id is: " << id << std::endl;
+        // myLogFile << "id is: " << id << std::endl;
     }
     void displayVectorElementArray()
     {
@@ -32,19 +35,26 @@ public:
 
 VectorElement::VectorElement(int dimensions, std::string fileLine)
 {
+    int temp;
     int counter = 0;
     size = dimensions;
     arrayVectorElement = new int[size];
     std::stringstream sso(fileLine);
     sso >> id;
-    while (sso >> id)
+    while (sso >> temp)
     {
         //pass in the arrayvectorelement the appropriate values
         // std::cout << "CONSTRUCTOR VALUES---:" << id << std::endl;
         // sso >> arrayVectorElement[counter];
-        arrayVectorElement[counter] = id;
+        arrayVectorElement[counter] = temp;
         counter++;
     }
+}
+
+VectorElement::~VectorElement(){
+
+    delete [] arrayVectorElement;
+
 }
 
 #endif /* VECTORELEMENT_H */
