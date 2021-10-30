@@ -1,8 +1,9 @@
 #include "VectorElement.h"
+#include "Helpers.h"
 
 using namespace std;
 
-std::ofstream myLogFile;
+//std::ofstream myLogFile;
 
 void VectorElement::displayId()
     {
@@ -11,10 +12,10 @@ void VectorElement::displayId()
 
 void VectorElement::displayVectorElementArray()
     {
-        cout << "---ELEMENT ARRAY---" << std::endl;
+        myLogFile << "---ELEMENT ARRAY---" << std::endl;
         for (int i = 0; i < size; i++)
         {
-            cout << "VE element no: " << arrayVectorElement[i] << std::endl;
+            myLogFile << "VE element no: " << arrayVectorElement[i] << std::endl;
         }
     }
 VectorElement::VectorElement(int dimensions, std::string fileLine)

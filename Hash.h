@@ -7,42 +7,43 @@
 #include <iostream>
 
 #include "VectorElement.h"
-
+#include "Helpers.h"
 
 using namespace std;
 
-class Hash
-{
-    int BUCKET;    // No. of buckets
+class Hash{
+    // static int* r_array;
+    int buckets;    // No. of buckets
  
     // Pointer to an array containing buckets
     list<VectorElement*> *table;
 
     double** array_of_v;
     double* array_of_t;
-    VectorElement * r_obj;
+    // VectorElement * r_obj;  //vector r
+
+    static int k_arg;
+    static int w_arg;
+
+    int temp;
+
+public:
+    static void set_k_arg(int temp){
+        k_arg=temp;
+    }
+    static int get_k_arg(){
+        return k_arg;
+    }
 public:
 
 
-    Hash(int V, int k_arg, int v_size);  // Constructor
+    Hash(int V, int v_size);
  
-    // inserts a key into hash table
-    void insertItem(VectorElement* x);
+    void insertItem(VectorElement* x, int* r_array);
  
-    // deletes a key from hash table
-    void deleteItem(VectorElement* key);
+    //void deleteItem(VectorElement* key);
  
-    // hash function to map values to key
-    int hashFunction(VectorElement* x) {
-
-        int size = x->size;
-        int sum = 0;
-        for (int i = 0; i < size; i++){
-            sum += x->arrayVectorElement[i];
-        }
-
-        return (sum % BUCKET);
-    }
+    int AmplifiedHashFunction(VectorElement* x, int* r_array);
  
     void displayHash();
 
