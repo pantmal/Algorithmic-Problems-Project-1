@@ -6,20 +6,24 @@
 #include <algorithm>
 #include <typeinfo>
 #include <cstdio>
-#include <chrono> 
-#include <random> 
+#include <chrono>
+#include <random>
 #include <climits>
 
 #include "VectorElement.h"
 #include "Hash.h"
 #include "Helpers.h"
 
-#define FILE_NAME_INPUT "input_small_id"
-#define FILE_NAME_QUERY "query_small_id"
+#define FILE_NAME_INPUT "DataTest.txt"
+#define FILE_NAME_QUERY "QueryTest.txt"
+
+#define NUMBER_OF_HASH_TABLES 1
+#define NUMBER_OF_BUCKETS 1
 
 using namespace std;
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
     //set up test logfile
     //ofstream myLogFile;
     bool justOnce = true;
@@ -56,7 +60,7 @@ int main(int argc, char *argv[]){
     myfile.close();
     myfile.clear();
     myfile.open(FILE_NAME_INPUT);
-    VectorElement** Input_Array = new VectorElement*[how_many_rows]; 
+    VectorElement **Input_Array = new VectorElement *[how_many_rows];
     int i = 0;
     if (myfile.is_open())
     {
@@ -66,11 +70,11 @@ int main(int argc, char *argv[]){
             stringstream sso(mystring);
             // sso >> temp;
             //fill the table of vectors with input from file
-            if (i<how_many_rows){
-                Input_Array[i] = new VectorElement(how_many_columns, mystring);  
+            if (i < how_many_rows)
+            {
+                Input_Array[i] = new VectorElement(how_many_columns, mystring);
                 i++;
             }
-                
         }
     }
     myfile.close();
@@ -79,62 +83,51 @@ int main(int argc, char *argv[]){
     myLogFile << "columns==== " << how_many_columns << endl;
     myLogFile << "rows==== " << how_many_rows << endl;
 
+    //--------DATA COLLECTED----------
 
-    //LIST TESTING
-    // list<VectorElement*> team1;  
-    // list<VectorElement*>::iterator hitr1;
-
-
-    // string string1test = "1 1 2 3 4 5";
-    // string string2test = "2 6 7 8 9 10";
-    // string string3test = "1 1 2 3 4 5";
-    // VectorElement * Vector_obj = new VectorElement(5,string1test);  
-    // VectorElement * Vector_obj2 = new VectorElement(5,string2test);
-    // VectorElement * Vector_obj3 = new VectorElement(5,string3test);
-    // team1.push_back(Vector_obj);  
-    // team1.push_back(Vector_obj2);  
-    // team1.push_back(Vector_obj);  
-
-    // for(hitr1=team1.begin();hitr1!=team1.end();hitr1++){
-        
-    //     VectorElement * vobj = *hitr1;
-    //     vobj->displayVectorElementArray();
-    // }
-
-    // cout << team1.size() << endl;
-    
+    //CHECK FOR ONE TABLE
     //Hash h(2500, how_many_columns);
+
     int k_input = 5;
     //h.set_k_arg(5); //dont forget to update k and w args
 
-
     // R ARRAY IS HERE
-    unsigned seed = chrono::steady_clock::now().time_since_epoch().count(); 
-    default_random_engine e (seed); 
-    
+    unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
+    default_random_engine e(seed);
+
     uniform_int_distribution<> Ur(0, INT_MAX);
-    int* r_array = new int[k_input];  // check for dynamic h.get_k_arg()
- 
-    for (int i=0; i<k_input; i++){
-      int r_val = Ur(e);    
-      r_array[i]=r_val;
+    int *r_array = new int[k_input]; // check for dynamic h.get_k_arg()
+
+    for (int i = 0; i < k_input; i++)
+    {
+        int r_val = Ur(e);
+        r_array[i] = r_val;
     }
-    
+
+    //CHECK FOR ONE TABLE
+    // for (int j = 0; j < how_many_rows; j++)
+    // {
+    //     h.insertItem(Input_Array[j], r_array);
+    // }
+
+    // h.displayHash();
+
     //HASH LIST
-    int L = 5;
+    int L = 1;
 
-    Hash** Hash_Array = new Hash*[L];
-    for (int i=0; i<L;i++){
-        Hash_Array[i] = new Hash(2500, how_many_columns);
-    } 
-    
-    for (int i=0; i<L;i++){
-        for (int j=0; j<how_many_rows;j++){
-            Hash_Array[i]->insertItem(Input_Array[j], r_array); 
-        } 
+    Hash **Hash_Array = new Hash *[NUMBER_OF_HASH_TABLES];
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    {
+        Hash_Array[i] = new Hash(NUMBER_OF_BUCKETS, how_many_columns);
     }
 
-
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    {
+        for (int j = 0; j < how_many_rows; j++)
+        {
+            Hash_Array[i]->insertItem(Input_Array[j], r_array);
+        }
+    }
 
     //COLUMNS?????? epanaipologismo????
     //OPEN QUERY FILE AND PARSE EACH LINE
@@ -142,63 +135,99 @@ int main(int argc, char *argv[]){
     myfilequery.open(FILE_NAME_QUERY);
     int query_rows = count(istreambuf_iterator<char>(myfilequery), istreambuf_iterator<char>(), '\n');
     //how_many_rows++;
+    cout << "Query rows are: " << query_rows << endl;
     myfilequery.close();
     myfilequery.clear();
     myfilequery.open(FILE_NAME_QUERY);
-    VectorElement** Query_Array = new VectorElement*[query_rows]; 
+    VectorElement **Query_Array = new VectorElement *[query_rows];
+    // neighboursInfo **Query_ArrayNeighbours = new neighboursInfo *[query_rows];
+    neighboursInfo neighboursArray[query_rows];
     int query_i = 0;
-    if (myfilequery.is_open()){
-        
-        while (myfilequery){
+    if (myfilequery.is_open())
+    {
+
+        while (myfilequery)
+        {
             getline(myfilequery, mystring);
             stringstream sso(mystring);
             // sso >> temp;
-            if (query_i<query_rows){
-                Query_Array[query_i] = new VectorElement(how_many_columns, mystring);  
+            if (query_i < query_rows)
+            {
+                Query_Array[query_i] = new VectorElement(how_many_columns, mystring);
                 query_i++;
             }
         }
     }
     myfilequery.close();
 
-
-    for (int i=0; i<L;i++){
-        for (int j=0; j<query_rows;j++){
-            Hash_Array[i]->insertItem(Query_Array[j], r_array); 
-        } 
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    {
+        for (int j = 0; j < query_rows; j++)
+        {
+            Hash_Array[i]->insertItem(Query_Array[j], r_array);
+        }
     }
 
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
+    {
+        for (int j = 0; j < query_rows; j++) //for eacrh q of the queryset
+        {
+            // Hash_Array[i]->calculateDistance(Query_Array[j], r_array, Query_ArrayNeighbours[j], j);
+            Hash_Array[i]->calculateDistance(Query_Array[j], r_array, (&neighboursArray)[query_rows], j);
+        }
+    }
+    // for (int i = 0; i < query_rows; i++)
+    // {
+    //     cout << "DISPLAY DISTANCE" << endl;
+    //     Query_ArrayNeighbours[i]->displayDistance();
+    //     cout << "DISPLAY ID" << endl;
+    //     Query_ArrayNeighbours[i]->displayID();
+    //     cout << "this works" << endl;
+    // }
+    for (int i = 0; i < query_rows; i++)
+    {
+        cout << "DISPLAY DISTANCE" << endl;
+        neighboursArray[i].displayDistance();
+        cout << "DISPLAY ID" << endl;
+        neighboursArray[i].displayID();
+        cout << "this works" << endl;
+    }
+    //----CHECK DATA----
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
+    {
+        for (int j = 0; j < query_rows; j++) //for eacrh q of the queryset
+        {
+            cout << "Hash Table: " << i << endl;
+            Hash_Array[i]->displayHash();
+        }
+    }
+    //---DELETE MEMORY---
 
+    delete[] r_array;
 
-
-
-
-
-
-
-
-    delete [] r_array;
-
-    for (int i=0; i<how_many_rows;i++){
+    for (int i = 0; i < how_many_rows; i++)
+    {
         Input_Array[i]->displayId();
-    } 
+    }
 
-    for (int i=0; i<how_many_rows;i++){
+    for (int i = 0; i < how_many_rows; i++)
+    {
         delete Input_Array[i];
     }
-    delete [] Input_Array;
+    delete[] Input_Array;
 
-    for (int i=0; i<L;i++){
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    {
         delete Hash_Array[i];
     }
-    delete [] Hash_Array;
+    delete[] Hash_Array;
 
-
-    for (int i=0; i<query_rows;i++){
+    for (int i = 0; i < query_rows; i++)
+    {
         delete Query_Array[i];
     }
 
-    delete [] Query_Array;
+    delete[] Query_Array;
 
     myLogFile.close();
 

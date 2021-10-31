@@ -6,22 +6,23 @@ using namespace std;
 //std::ofstream myLogFile;
 
 void VectorElement::displayId()
-    {
-        // myLogFile << "id is: " << id << std::endl;
-    }
+{
+    // myLogFile << "id is: " << id << std::endl;
+}
 
 void VectorElement::displayVectorElementArray()
+{
+    cout << "---ELEMENT ARRAY---" << std::endl;
+    for (int i = 0; i < size; i++)
     {
-        myLogFile << "---ELEMENT ARRAY---" << std::endl;
-        for (int i = 0; i < size; i++)
-        {
-            myLogFile << "VE element no: " << arrayVectorElement[i] << std::endl;
-        }
+        cout << "VE element no: " << arrayVectorElement[i] << std::endl;
     }
+}
 VectorElement::VectorElement(int dimensions, std::string fileLine)
 {
     int temp;
     int counter = 0;
+    distanceCurrQ = 0;
     size = dimensions;
     arrayVectorElement = new int[size];
     std::stringstream sso(fileLine);
@@ -35,8 +36,22 @@ VectorElement::VectorElement(int dimensions, std::string fileLine)
         counter++;
     }
 }
-VectorElement::~VectorElement(){
+void VectorElement::displayDistanceCurrQ()
+{
+    cout << distanceCurrQ << endl;
+}
+void VectorElement::setDistanceRandom()
+{
+    unsigned long x;
+    x = rand();
+    x <<= 15;
+    x ^= rand();
+    x %= 10000001;
+    distanceCurrQ = x + 1;
+}
 
-    delete [] arrayVectorElement;
+VectorElement::~VectorElement()
+{
 
+    delete[] arrayVectorElement;
 }
