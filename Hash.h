@@ -8,6 +8,7 @@
 
 #include "VectorElement.h"
 #include "Helpers.h"
+#include "Neighbours.h"
 
 using namespace std;
 
@@ -18,10 +19,9 @@ class Hash
 
     // Pointer to an array containing buckets
     list<VectorElement *> *table;
-
+    neighboursInfo **neighboursInfoTable;
     double **array_of_v;
     double *array_of_t;
-    // VectorElement * r_obj;  //vector r
 
     static int k_arg;
     static int w_arg;
@@ -37,10 +37,13 @@ public:
     {
         return k_arg;
     }
-    void calculateDistance(VectorElement *, int *r_array, neighboursInfo *, int);
+    void calculateDistanceAndFindN(VectorElement *, int *r_array, int j, int N);
+    void displayNeighbours(int, int);
 
 public:
     Hash(int V, int v_size);
+
+    void initNeighboursInfo(int query_rows, int N);
 
     void insertItem(VectorElement *x, int *r_array);
 

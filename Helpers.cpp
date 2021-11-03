@@ -15,25 +15,33 @@ int testL2()
     x %= 10000001;
     return x;
 }
+void coutLineWithMessage(std::string m)
+{
+    std::cout << "------" << m << "------" << std::endl;
+}
+void logFileLineWithMessage(std::string m)
+{
+    myLogFile << "------" << m << "------" << std::endl;
+}
 
-void neighboursInfo::displayID()
-{
-    if (id.empty())
-        cout << "ID list is empty" << endl;
-    std::list<int>::iterator it;
-    for (it = id.begin(); it != id.end(); ++it)
-    {
-        std::cout << *it;
-    }
-}
-void neighboursInfo::displayDistance()
-{
-    if (distance.empty())
-        cout << "Distance list is empty" << endl;
-    std::list<int>::iterator it;
-    for (it = id.begin(); it != id.end(); ++it)
-    {
-        std::cout << *it;
-    }
-}
+// void neighboursInfo::displayID()
+// {
+//     if (id.empty())
+//         cout << "ID list is empty" << endl;
+//     std::list<int>::iterator it;
+//     for (it = id.begin(); it != id.end(); ++it)
+//     {
+//         std::cout << *it;
+//     }
+// }
+// void neighboursInfo::displayDistance()
+// {
+//     if (distance.empty())
+//         cout << "Distance list is empty" << endl;
+//     std::list<int>::iterator it;
+//     for (it = id.begin(); it != id.end(); ++it)
+//     {
+//         std::cout << *it;
+//     }
+// }
 std::ofstream myLogFile;

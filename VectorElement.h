@@ -12,8 +12,8 @@ class VectorElement
 public:
     int id; //name/id of the element
     int size;
-    int *arrayVectorElement;
-    int distanceCurrQ;
+    double *arrayVectorElement;
+    double distanceCurrQ;
 
 public:
     VectorElement(int, std::string);
@@ -26,6 +26,7 @@ public:
     void displayId();
     void displayVectorElementArray();
     void displayDistanceCurrQ();
+    double getL2Distance(VectorElement *);
 };
 
 #endif /* VECTORELEMENT_H */

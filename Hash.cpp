@@ -10,6 +10,7 @@
 #include "Hash.h"
 #include "VectorElement.h"
 #include "Helpers.h"
+#include "Neighbours.h"
 
 using namespace std;
 
@@ -65,6 +66,23 @@ Hash::Hash(int b, int v_size)
   }
 }
 
+void Hash::initNeighboursInfo(int query_rows, int N)
+{ //N =no of neighbours
+
+  for (int i = 0; i < query_rows; i++)
+  {
+    this->neighboursInfoTable = new neighboursInfo *[query_rows];
+  }
+
+  for (int i = 0; i < query_rows; i++)
+  {
+    for (int j = 0; j < N; j++)
+    {
+      this->neighboursInfoTable[j] = new neighboursInfo(N);
+    }
+  }
+}
+
 int Hash::AmplifiedHashFunction(VectorElement *key, int *r_array)
 {
   //k_arg=5;
@@ -79,7 +97,7 @@ int Hash::AmplifiedHashFunction(VectorElement *key, int *r_array)
   for (int k = 0; k < k_arg; k++)
   {
 
-    int *array_start = key->arrayVectorElement;
+    double *array_start = key->arrayVectorElement;
     double inner_prod = inner_product(array_start, array_start + (key->size), this->array_of_v[k], 0.0); //~=[-11,11]
     h_array[k] = floor((inner_prod + array_of_t[k]) / w_arg);                                            //~=2-3
     //cout << h_array[k]<<endl;
@@ -104,7 +122,7 @@ int Hash::AmplifiedHashFunction(VectorElement *key, int *r_array)
   return index;
 }
 
-void Hash::calculateDistance(VectorElement *q, int *r_array, neighboursInfo *nInfo, int j)
+void Hash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int N) //j=no of query
 {
   int index = AmplifiedHashFunction(q, r_array);
   list<VectorElement *>::iterator hitr1;
@@ -115,20 +133,44 @@ void Hash::calculateDistance(VectorElement *q, int *r_array, neighboursInfo *nIn
   for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
   {
     VectorElement *vobj = *hitr1;
-    vobj->setDistanceRandom();
+    // vobj->setDistanceRandom();
+    vobj->getL2Distance(q);
+    cout << "init dist:" << vobj->distanceCurrQ << endl;
   }
   table[index].sort(cmp);
-  // int counter = 1;
+
+  int Ni = 0;
+  //int arr[5];
   for (hitr2 = table[index].begin(); hitr2 != table[index].end(); ++hitr2)
   {
-    // cout << "WHY DOES THIS DESTROY EVERTYHING" << endl;
-    VectorElement *vobj2 = *hitr2;
-    vobj2->setDistanceRandom();
-    nInfo[j].id.push_back(vobj2->id);
-    nInfo[j].id.push_back(vobj2->distanceCurrQ);
-    // nInfo[j].distance.push_back(vobj2->distanceCurrQ);
-    // cout << "vobj2->id: " << vobj2->distanceCurrQ << endl;
+
+    VectorElement *vobj = *hitr2;
+
+    neighboursInfoTable[j]->arrayDistance[Ni] = vobj->distanceCurrQ;
+    neighboursInfoTable[j]->arrayId[Ni] = vobj->id;
+    Ni++;
+    if (Ni == N)
+    {
+      break;
+    }
   }
+
+  // for (int i = 0; i < 5; i++)
+  // {
+  //   cout << "temp array dist:" << arr[i] << endl;
+  // }
+
+  // int counter = 1;
+  // for (hitr2 = table[index].begin(); hitr2 != table[index].end(); ++hitr2)
+  // {
+  // cout << "WHY DOES THIS DESTROY EVERTYHING" << endl;
+  // VectorElement *vobj2 = *hitr2;
+  // vobj2->setDistanceRandom();
+  // nInfo[j].id.push_back(vobj2->id);
+  // nInfo[j].id.push_back(vobj2->distanceCurrQ);
+  // nInfo[j].distance.push_back(vobj2->distanceCurrQ);
+  // cout << "vobj2->id: " << vobj2->distanceCurrQ << endl;
+  // }
   // for (hitr1 = table[index].begin(); hitr1 != table[index].end(); hitr1++)
   // {
   //   VectorElement *vobj2 = *hitr2;
@@ -200,6 +242,21 @@ void Hash::displayHash()
     }
   }
   myLogFile << endl;
+}
+
+void Hash::displayNeighbours(int query_rows, int N)
+{
+  coutLineWithMessage();
+  for (int i = 0; i < query_rows; i++)
+  {
+    for (int j = 0; j < N; j++)
+    {
+      cout << "id: " << neighboursInfoTable[i]->arrayId[j] << endl;
+      cout << "distance: " << neighboursInfoTable[i]->arrayDistance[j] << endl;
+    }
+    coutLineWithMessage("query end");
+  }
+  coutLineWithMessage();
 }
 
 Hash::~Hash()

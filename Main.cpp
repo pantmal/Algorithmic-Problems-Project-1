@@ -10,6 +10,7 @@
 #include <random>
 #include <climits>
 
+#include "Neighbours.h"
 #include "VectorElement.h"
 #include "Hash.h"
 #include "Helpers.h"
@@ -19,6 +20,7 @@
 
 #define NUMBER_OF_HASH_TABLES 1
 #define NUMBER_OF_BUCKETS 1
+#define NUMBER_OF_NEIGHBOURS 5
 
 using namespace std;
 
@@ -140,8 +142,6 @@ int main(int argc, char *argv[])
     myfilequery.clear();
     myfilequery.open(FILE_NAME_QUERY);
     VectorElement **Query_Array = new VectorElement *[query_rows];
-    // neighboursInfo **Query_ArrayNeighbours = new neighboursInfo *[query_rows];
-    neighboursInfo neighboursArray[query_rows];
     int query_i = 0;
     if (myfilequery.is_open())
     {
@@ -160,22 +160,36 @@ int main(int argc, char *argv[])
     }
     myfilequery.close();
 
-    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
-    {
-        for (int j = 0; j < query_rows; j++)
-        {
-            Hash_Array[i]->insertItem(Query_Array[j], r_array);
-        }
-    }
+    //USED FOR TESTING
+    // for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    // {
+    //     for (int j = 0; j < query_rows; j++)
+    //     {
+    //         Hash_Array[i]->insertItem(Query_Array[j], r_array);
+    //     }
+    // }
 
+    cout << "got2" << endl;
+
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
+    {
+        Hash_Array[i]->initNeighboursInfo(query_rows, NUMBER_OF_NEIGHBOURS);
+    }
+    // std::cout.flush();
+    cout << "got" << endl;
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
     {
         for (int j = 0; j < query_rows; j++) //for eacrh q of the queryset
         {
-            // Hash_Array[i]->calculateDistance(Query_Array[j], r_array, Query_ArrayNeighbours[j], j);
-            Hash_Array[i]->calculateDistance(Query_Array[j], r_array, (&neighboursArray)[query_rows], j);
+            Hash_Array[i]->calculateDistanceAndFindN(Query_Array[j], r_array, j, NUMBER_OF_NEIGHBOURS);
         }
     }
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    {
+        Hash_Array[i]->displayNeighbours(query_rows, NUMBER_OF_NEIGHBOURS);
+        cout << "HT end" << endl;
+    }
+
     // for (int i = 0; i < query_rows; i++)
     // {
     //     cout << "DISPLAY DISTANCE" << endl;
@@ -184,23 +198,24 @@ int main(int argc, char *argv[])
     //     Query_ArrayNeighbours[i]->displayID();
     //     cout << "this works" << endl;
     // }
-    for (int i = 0; i < query_rows; i++)
-    {
-        cout << "DISPLAY DISTANCE" << endl;
-        neighboursArray[i].displayDistance();
-        cout << "DISPLAY ID" << endl;
-        neighboursArray[i].displayID();
-        cout << "this works" << endl;
-    }
+    // for (int i = 0; i < query_rows; i++)
+    // {
+    //     cout << "DISPLAY DISTANCE" << endl;
+    //     neighboursArray[i].displayDistance();
+    //     cout << "DISPLAY ID" << endl;
+    //     neighboursArray[i].displayID();
+    //     cout << "this works" << endl;
+    // }
     //----CHECK DATA----
-    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
-    {
-        for (int j = 0; j < query_rows; j++) //for eacrh q of the queryset
-        {
-            cout << "Hash Table: " << i << endl;
-            Hash_Array[i]->displayHash();
-        }
-    }
+
+    // for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
+    // {
+    //     for (int j = 0; j < query_rows; j++) //for eacrh q of the queryset
+    //     {
+    //         cout << "Hash Table: " << i << endl;
+    //         Hash_Array[i]->displayHash();
+    //     }
+    // }
     //---DELETE MEMORY---
 
     delete[] r_array;
