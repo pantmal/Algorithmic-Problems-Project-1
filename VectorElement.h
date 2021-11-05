@@ -14,9 +14,10 @@ public:
     int size;
     double *arrayVectorElement;
     double distanceCurrQ;
+    unsigned int *QueryTrickid;
 
 public:
-    VectorElement(int, std::string);
+    VectorElement(int, std::string, int);
     ~VectorElement();
     void setDistance(int x)
     {

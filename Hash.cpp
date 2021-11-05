@@ -29,10 +29,11 @@ int euclidean_mod(int a, unsigned int b)
 //   // return r >= 0 ? r : r + abs(b);
 //   return a%b;
 // }
-
+int Hash::hashNumber = 1;
 Hash::Hash(int b, int v_size)
 {
-
+  hashTableNumber = hashNumber;
+  hashNumber++;
   this->buckets = b;
   table = new list<VectorElement *>[buckets];
 
@@ -116,10 +117,45 @@ int Hash::AmplifiedHashFunction(VectorElement *key, int *r_array)
   unsigned int final_mod = euclidean_mod(pre_mod, M);
   //cout<<final_mod<<endl;
   unsigned int index = euclidean_mod(final_mod, buckets);
-
   delete[] h_array;
-
+  key->QueryTrickid[hashTableNumber] = final_mod;
   return index;
+}
+unsigned int Hash::getQueryTrickId(VectorElement *key, int *r_array)
+{
+  //k_arg=5;
+  //array_of_v=>[-3,3]
+  //array_of_t=>[0,3] epireazetai apo to w
+  //w=4
+  //r_array=>[0,intmax]
+  //h_array=> megales
+  //pre-mod=>0
+  //final-mod=>
+  int *h_array = new int[k_arg]; //k_arg=5
+  for (int k = 0; k < k_arg; k++)
+  {
+
+    double *array_start = key->arrayVectorElement;
+    double inner_prod = inner_product(array_start, array_start + (key->size), this->array_of_v[k], 0.0); //~=[-11,11]
+    h_array[k] = floor((inner_prod + array_of_t[k]) / w_arg);                                            //~=2-3
+    //cout << h_array[k]<<endl;
+  }
+
+  int pre_mod = 0;
+  unsigned int M = UINT_MAX - 5;
+  for (int i = 0; i < k_arg; i++)
+  {
+
+    unsigned int euc_mod = euclidean_mod(r_array[i] * h_array[i], M);
+    pre_mod += euc_mod;
+  }
+
+  //cout<<pre_mod<<endl;
+  unsigned int final_mod = euclidean_mod(pre_mod, M);
+  //cout<<final_mod<<endl;
+  // unsigned int index = euclidean_mod(final_mod, buckets);
+  delete[] h_array;
+  return final_mod;
 }
 
 void Hash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int N) //j=no of query
@@ -135,9 +171,14 @@ void Hash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int 
     VectorElement *vobj = *hitr1;
     // vobj->setDistanceRandom();
     vobj->getL2Distance(q);
-    cout << "init dist:" << vobj->distanceCurrQ << endl;
+    // cout << "init dist:" << vobj->distanceCurrQ << endl;
   }
   table[index].sort(cmp);
+
+  // if (table[index].size() < N)
+  // {
+  //   cout << "in this case we have to cut" << endl;
+  // }
 
   int Ni = 0;
   //int arr[5];
@@ -189,9 +230,9 @@ void Hash::insertItem(VectorElement *key, int *r_array)
 {
 
   int index = AmplifiedHashFunction(key, r_array);
+  // key->QueryTrickid = this->getQueryTrickId(key, r_array);
   table[index].push_back(key);
 }
-
 //UNCOMMENT IN CASE WE WANT TO DELETE STUFF
 // void Hash::deleteItem(VectorElement* key){
 //   // get the hash index of key
@@ -236,27 +277,36 @@ void Hash::displayHash()
     myLogFile << "INDEX: " << i << endl;
     for (auto x : table[i])
     {
-      cout << " --> " << endl;
+      myLogFile << " --> " << endl;
+      myLogFile << "id" << x->id << endl;
       x->displayVectorElementArray();
-      x->displayDistanceCurrQ();
+      //x->displayDistanceCurrQ();
     }
   }
   myLogFile << endl;
 }
 
-void Hash::displayNeighbours(int query_rows, int N)
+// void Hash::displayNeighbours(int query_rows, int N)
+// {
+//   coutLineWithMessage();
+//   for (int i = 0; i < query_rows; i++)
+//   {
+//     for (int j = 0; j < N; j++)
+//     {
+//       cout << "id: " << neighboursInfoTable[i]->arrayId[j] << endl;
+//       cout << "distance: " << neighboursInfoTable[i]->arrayDistance[j] << endl;
+//     }
+//     coutLineWithMessage("query end");
+//   }
+//   coutLineWithMessage();
+// }
+void Hash::displayNeighbours(int N)
 {
-  coutLineWithMessage();
-  for (int i = 0; i < query_rows; i++)
+  for (int i = 0; i < N; i++)
   {
-    for (int j = 0; j < N; j++)
-    {
-      cout << "id: " << neighboursInfoTable[i]->arrayId[j] << endl;
-      cout << "distance: " << neighboursInfoTable[i]->arrayDistance[j] << endl;
-    }
-    coutLineWithMessage("query end");
+    cout << this->neighboursInfoTable[0]->arrayId[i] << endl;
+    cout << this->neighboursInfoTable[0]->arrayDistance[i] << endl;
   }
-  coutLineWithMessage();
 }
 
 Hash::~Hash()

@@ -19,6 +19,10 @@ void coutLineWithMessage(std::string m)
 {
     std::cout << "------" << m << "------" << std::endl;
 }
+void coutLineWithMessage(int k, std::string m)
+{
+    std::cout << "------" << m + " " << k << "------" << std::endl;
+}
 void logFileLineWithMessage(std::string m)
 {
     myLogFile << "------" << m << "------" << std::endl;
@@ -44,4 +48,8 @@ void logFileLineWithMessage(std::string m)
 //         std::cout << *it;
 //     }
 // }
+bool cmpListPair(idDistancePair &L, idDistancePair &R)
+{
+    return L.getDistance() < R.getDistance();
+}
 std::ofstream myLogFile;

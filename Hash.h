@@ -14,6 +14,9 @@ using namespace std;
 
 class Hash
 {
+public:
+    static int hashNumber;
+    int hashTableNumber;
     // static int* r_array;
     int buckets; // No. of buckets
 
@@ -38,7 +41,7 @@ public:
         return k_arg;
     }
     void calculateDistanceAndFindN(VectorElement *, int *r_array, int j, int N);
-    void displayNeighbours(int, int);
+    void displayNeighbours(int);
 
 public:
     Hash(int V, int v_size);
@@ -54,6 +57,7 @@ public:
     }
 
     int AmplifiedHashFunction(VectorElement *x, int *r_array);
+    unsigned int getQueryTrickId(VectorElement *x, int *r_array);
     void displayHash();
 
     ~Hash();

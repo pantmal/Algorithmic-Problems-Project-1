@@ -14,15 +14,17 @@ void VectorElement::displayId()
 
 void VectorElement::displayVectorElementArray()
 {
-    cout << "---ELEMENT ARRAY---" << std::endl;
+    myLogFile << "---ELEMENT ARRAY---" << std::endl;
     for (int i = 0; i < size; i++)
     {
-        cout << "VE element no: " << arrayVectorElement[i] << std::endl;
+        myLogFile << "VE element no: " << arrayVectorElement[i] << std::endl;
     }
 }
 
-VectorElement::VectorElement(int dimensions, std::string fileLine)
+VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfHashTables)
 {
+    QueryTrickid = new unsigned int[numberOfHashTables]; //gets set when the vector element gets into a bucket
+    id = 0;
     double temp;
     int counter = 0;
     distanceCurrQ = 0;

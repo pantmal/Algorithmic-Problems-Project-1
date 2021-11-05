@@ -10,22 +10,27 @@
 #include <random>
 #include <climits>
 
+#include <list>
+#include <vector>
+
 #include "Neighbours.h"
 #include "VectorElement.h"
 #include "Hash.h"
 #include "Helpers.h"
+#include "idDistancePair.h"
 
 #define FILE_NAME_INPUT "DataTest.txt"
 #define FILE_NAME_QUERY "QueryTest.txt"
 
-#define NUMBER_OF_HASH_TABLES 1
+#define NUMBER_OF_HASH_TABLES 5
 #define NUMBER_OF_BUCKETS 1
-#define NUMBER_OF_NEIGHBOURS 5
+#define NUMBER_OF_NEIGHBOURS 10
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+
     //set up test logfile
     //ofstream myLogFile;
     bool justOnce = true;
@@ -36,12 +41,12 @@ int main(int argc, char *argv[])
     string tempString;
 
     myLogFile.open("logFile.txt");
-
     ifstream myfile;
     //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
     myfile.open(FILE_NAME_INPUT);
     how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
     //how_many_rows++;
+    coutLineWithMessage(how_many_rows, "dataset rows are:");
     myfile.close();
     myfile.clear();
     myfile.open(FILE_NAME_INPUT);
@@ -74,7 +79,7 @@ int main(int argc, char *argv[])
             //fill the table of vectors with input from file
             if (i < how_many_rows)
             {
-                Input_Array[i] = new VectorElement(how_many_columns, mystring);
+                Input_Array[i] = new VectorElement(how_many_columns, mystring, NUMBER_OF_HASH_TABLES);
                 i++;
             }
         }
@@ -113,6 +118,7 @@ int main(int argc, char *argv[])
     // }
 
     // h.displayHash();
+    // coutLineWithMessage();
 
     //HASH LIST
     int L = 1;
@@ -153,7 +159,7 @@ int main(int argc, char *argv[])
             // sso >> temp;
             if (query_i < query_rows)
             {
-                Query_Array[query_i] = new VectorElement(how_many_columns, mystring);
+                Query_Array[query_i] = new VectorElement(how_many_columns, mystring, NUMBER_OF_HASH_TABLES);
                 query_i++;
             }
         }
@@ -169,14 +175,13 @@ int main(int argc, char *argv[])
     //     }
     // }
 
-    cout << "got2" << endl;
+    // cout << "got2" << endl;
+    // coutLineWithMessage();
 
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
     {
         Hash_Array[i]->initNeighboursInfo(query_rows, NUMBER_OF_NEIGHBOURS);
     }
-    // std::cout.flush();
-    cout << "got" << endl;
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++) //for each hash table
     {
         for (int j = 0; j < query_rows; j++) //for eacrh q of the queryset
@@ -184,10 +189,60 @@ int main(int argc, char *argv[])
             Hash_Array[i]->calculateDistanceAndFindN(Query_Array[j], r_array, j, NUMBER_OF_NEIGHBOURS);
         }
     }
-    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    // for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    // {
+    //     Hash_Array[i]->displayNeighbours(query_rows, NUMBER_OF_NEIGHBOURS);
+    //     cout << "HT end" << endl;
+    // }
+    // -----PRINT NEIGHBOURS INFO-- --coutLineWithMessage("NEIGHBOURS ARRAY");
+    for (int i = 0; i < NUMBER_OF_NEIGHBOURS; i++)
     {
-        Hash_Array[i]->displayNeighbours(query_rows, NUMBER_OF_NEIGHBOURS);
-        cout << "HT end" << endl;
+        cout << "Id: " << Hash_Array[0]->neighboursInfoTable[0]->arrayId[i] << endl;
+        cout << "Distance: " << Hash_Array[0]->neighboursInfoTable[0]->arrayDistance[i] << endl;
+    }
+    // list<VectorElement *>::iterator hitr1;
+    // for (hitr1 = Hash_Array[0]->table[0].begin(); hitr1 != Hash_Array[0]->table[0].end(); ++hitr1)
+    // {
+    //     VectorElement *vobj = *hitr1;
+    // cout << "id is: " << vobj->id << endl;
+    // cout << "query trick id is: " << vobj->QueryTrickid[0] << endl;
+    // cout << "init dist:" << vobj->distanceCurrQ << endl;
+    // }
+    // DISPLAY NEAREST NEIGHBOURS FOR EVERY QUERY
+    list<idDistancePair> PairList;
+    cout << "nearest neighbours displayed are: " << NUMBER_OF_NEIGHBOURS << endl;
+    for (int i = 0; i < query_rows; i++)
+    {
+        cout << "query number: " << i + 1 << endl;
+        for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++)
+        {
+            // cout << "---Hash Table: " << j + 1 << " ---" << endl;
+            for (int k = 0; k < NUMBER_OF_NEIGHBOURS; k++)
+            {
+                idDistancePair *Pair = new idDistancePair(Hash_Array[j]->neighboursInfoTable[i]->arrayId[k], Hash_Array[j]->neighboursInfoTable[i]->arrayDistance[k]);
+                PairList.push_back(*Pair);
+                // cout << "neighbour: " << k + 1 << " ";
+                // cout << "id:" << Hash_Array[j]->neighboursInfoTable[i]->arrayId[k] << " ";
+                // cout << "distance: " << Hash_Array[j]->neighboursInfoTable[i]->arrayDistance[k] << endl;
+                delete Pair;
+            }
+        }
+        PairList.sort(cmpListPair);
+        list<idDistancePair>::iterator hitr1;
+        int currNeighbours = 0;
+        coutLineWithMessage("PAIR LIST");
+        for (hitr1 = PairList.begin(); hitr1 != PairList.end(); ++hitr1)
+        {
+            if (currNeighbours == NUMBER_OF_NEIGHBOURS)
+                break;
+            // idDistancePair vobj = hitr1;
+            cout << " list id: " << hitr1->getId() << endl;
+            cout << "list distance: " << hitr1->getDistance() << endl;
+            currNeighbours++;
+        }
+
+        //reset the list for new q
+        PairList.clear();
     }
 
     // for (int i = 0; i < query_rows; i++)
@@ -216,6 +271,12 @@ int main(int argc, char *argv[])
     //         Hash_Array[i]->displayHash();
     //     }
     // }
+
+    //---CHECK NEIGHBOURS DATA----
+    // coutLineWithMessage("NEIGHBOURRS");
+    // Hash_Array[0]->displayNeighbours(NUMBER_OF_NEIGHBOURS);
+    // coutLineWithMessage("NEIGHBOURS");
+
     //---DELETE MEMORY---
 
     delete[] r_array;
