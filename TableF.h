@@ -27,7 +27,8 @@ class TableF
 public:
     TableF();
 
-    void insertItem(double );
+    int checkItem(int);
+    void insertItem(int, int );
     void displayHash();
 
     ~TableF();

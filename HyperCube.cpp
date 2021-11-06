@@ -7,17 +7,51 @@
 #include <cmath>
 #include <string>
 #include <bitset>
+#include <bits/stdc++.h>
 
 #include "VectorElement.h"
 #include "TableF.h"
 #include "HyperCube.h"
+#include "Neighbours.h"
 
-HyperCube::HyperCube(int k_arg, int v_size){
 
-  //change this
-  int w_arg = 4;
+string getBinaryString(int num, int bits) {
+    vector<char> digits(bits);
+    for (int i = 0; i < bits; ++i) {
+      digits.push_back(num % 2 + '0');
+      num >>= 1;  
+    }
+    return string(digits.rbegin(), digits.rend());
+}
 
-  dims = pow(2,k_arg) 
+int hammingDistance(string str1, string str2){
+  int i = 0, count = 0;
+  while (str1[i] != '\0')
+  {
+    if (str1[i] != str2[i])
+      count++;
+    i++;
+  }
+  return count;
+}
+
+HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int probes_arg){
+
+  N = N_arg;
+  Ni = 0;
+
+  M = M_arg;
+  Mi = 0;
+  
+  probes = probes_arg;
+  probes_counter = 0;
+
+  hammingCounter = 0;
+
+  w_cube = w_arg;
+  k_cube = k_arg;
+
+  int dims = pow(2,k_arg);
   this->buckets = dims;
   table = new list<VectorElement* >[buckets];
 
@@ -53,10 +87,28 @@ HyperCube::HyperCube(int k_arg, int v_size){
 
   TableOfValuesF = new TableF *[k_arg];
   for (int i = 0; i < k_arg; i++){
-    TableOfValuesF[i] = new TableF(NUMBER_OF_BUCKETS, how_many_columns);
+    TableOfValuesF[i] = new TableF();
    }
 
     
+}
+
+void HyperCube::initNeighboursInfo(int query_rows)
+{ //N =no of neighbours
+
+  for (int i = 0; i < query_rows; i++)
+  {
+    this->neighboursInfoTable = new neighboursInfo *[query_rows];
+  }
+
+  for (int i = 0; i < query_rows; i++)
+  {
+    for (int j = 0; j < N; j++)
+    {
+      this->neighboursInfoTable[j] = new neighboursInfo(N);
+    }
+  }
+
 }
 
 
@@ -73,6 +125,7 @@ int HyperCube::functionF(int h, int i){
         TableOfValuesF[i]->insertItem(h,bit);
         return bit;
     }else{
+        //cout << "found index" << endl;
         return checkpos;
     }
 
@@ -82,24 +135,27 @@ int HyperCube::functionF(int h, int i){
 int HyperCube::indexBuilder(VectorElement *key){
 
     string index_s = "";
+    int k_arg = k_cube;
     int *h_array = new int[k_arg];
     for (int i = 0; i < k_arg; i++){
         double *array_start = key->arrayVectorElement;
-        double inner_prod = inner_product(array_start, array_start + (key->size), this->array_of_v[k], 0.0); //~=[-11,11]
-        h_array[k] = floor((inner_prod + array_of_t[k]) / w_arg); 
+        double inner_prod = inner_product(array_start, array_start + (key->size), this->array_of_v[i], 0.0); //~=[-11,11]
+        h_array[i] = floor((inner_prod + array_of_t[i]) / w_cube); 
     }
 
     for (int i = 0; i < k_arg; i++){
-        int bit = functionF(h[i], i);
+        //cout << h_array[i] << endl;
+        int bit = functionF(h_array[i], i);
         string bit_s = to_string(bit);    
-        string += bit_s;
+        index_s += bit_s;
     }
 
-    cout << "int " << bitset<k_arg>(index_s).to_ulong();
+    
+    cout << "int " << stoi(index_s,nullptr,2) << endl;
 
-    long index = bitset<k_arg>(index_s).to_ulong();
+    int index = stoi(index_s,nullptr,2);
 
-    return (int)index;
+    return index;
 
 
 }
@@ -107,41 +163,164 @@ int HyperCube::indexBuilder(VectorElement *key){
 
 void HyperCube::insertItem(VectorElement *key){
 
-    int index = indexBuilder(key)
-    table[index].push_back(item);
+    int index = indexBuilder(key);
+    table[index].push_back(key);
 
 }
 
-void HyperCube::displayHash(){
+void HyperCube::getFirstProbe(VectorElement *key, int j){
+
+  probesCandidates.clear();
+  visited.clear();
+  hammingCounter = 0;
+  Ni = 0;
+  Mi = 0;
+  probes_counter = 0;
+
+  int index = indexBuilder(key);
+  cout << "inde" << index << endl;
+  calculateDistanceAndFindN(key,j,index);
+
+}
+
+
+void HyperCube::getNextProbe(VectorElement *key, int j, int index){
+
+  if (probesCandidates.empty()){
+
+    hammingCounter++;
+
+    for (int bucket = 0; bucket < buckets; bucket++){
+      if (index == bucket) continue;
+
+      if (!visited.empty()){
+        bool visit_check = visited.find(bucket) != visited.end();
+        if (visit_check) continue;
+      }
+      
+
+      string index_s = getBinaryString(index, k_cube);
+      string bucket_s = getBinaryString(bucket, k_cube);
+
+      int dist = hammingDistance(index_s, bucket_s);
+
+      //visited.insert(bucket);
+
+      if (dist == hammingCounter){
+        probesCandidates.push_back(bucket);
+      }      
+    }
+
+    for (list<int>::iterator i=probesCandidates.begin(); i!=probesCandidates.end(); i++)
+    {
+      int item = *i;
+      visited.insert(item);
+    }
+
+  }
+
+  unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
+  default_random_engine e(seed);
+  uniform_int_distribution<> U(0,probesCandidates.size()-1);
+  int random_element = U(e);
+      
+  list<int>::iterator it = probesCandidates.begin();
+  advance(it,random_element);
+  int item = *it;
+  //cout << item << endl;
+  probesCandidates.erase(it);
+
+  calculateDistanceAndFindN(key, j, item);
+
+
+}
+
+void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
+
+  //int index = indexBuilder(key);
+
+  list<VectorElement *>::iterator hitr1;
+  list<VectorElement *>::iterator hitr2;
+
+  for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
+  {
+    VectorElement *vobj = *hitr1;
+    vobj->getL2Distance(q);
+    //cout << "init dist:" << vobj->distanceCurrQ << endl;
+  }
+  table[index].sort(cmp);
+
+  
+  for (hitr2 = table[index].begin(); hitr2 != table[index].end(); hitr2++)
+  {
+
+    if (Ni == N){
+      break;
+    }
+
+    if (Mi == M){
+      break;
+    }
+
+    VectorElement *vobj = *hitr2;
+    neighboursInfoTable[j]->arrayDistance[Ni] = vobj->distanceCurrQ;
+    neighboursInfoTable[j]->arrayId[Ni] = vobj->id;
+
+
+    Ni++;
+    Mi++;
+    
+  }
+
+  probes_counter++;
+
+  if ( Ni < N){
+    if (Mi != M){
+      if (probes_counter != probes ){
+        cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
+        cout << "index " << index << endl;
+        getNextProbe(q,j,index);
+      }
+    }
+  }
+
+
+}
+
+
+void HyperCube::displayCube(){
     for (int i = 0; i < buckets; i++){
     cout << "INDEX: " << i << endl;
     for (auto x : table[i])
     {
       cout << " --> " << x << endl;
+      x->displayVectorElementArray();
     }
   }
 
+  //for (int i = 0; i < 3; i++){
+  //  TableOfValuesF[i]->displayHash();
+  //}
+
 }
 
-~HyperCube::HyperCube(){
+HyperCube::~HyperCube(){
 
-    //change this 
-    int k_arg = 3;
+    
+  for (unsigned k = 0; k < k_cube; k++)
+  {
+      delete[] this->array_of_v[k];
+  }
 
-    for (unsigned k = 0; k < k_arg; k++)
-    {
-        delete[] this->array_of_v[k];
-    }
+  delete[] this->array_of_v;
+  delete[] this->array_of_t;
 
-    delete[] this->array_of_v;
-    delete[] this->array_of_t;
+  for (int i = 0; i < k_cube; i++){
+      delete TableOfValuesF[i];
+  }
+  delete[] TableOfValuesF;
 
-    for (int i = 0; i < k_arg; i++){
-        delete TableOfValuesF[i];
-    }
-    delete[] TableOfValuesF;
-
-    delete[] table;
+  delete[] table;
 }
 
 //f

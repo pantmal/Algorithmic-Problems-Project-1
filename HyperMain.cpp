@@ -10,10 +10,11 @@
 #include <random>
 #include <climits>
 
-#include "Neighbours.h"
+//#include "Neighbours.h"
 #include "VectorElement.h"
-#include "Hash.h"
-#include "Helpers.h"
+#include "HyperCube.h"
+// #include "Hash.h"
+// #include "Helpers.h"
 
 #define FILE_NAME_INPUT "DataTest.txt"
 #define FILE_NAME_QUERY "QueryTest.txt"
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     string mystring;
     string tempString;
 
-    myLogFile.open("logFile.txt");
+    //myLogFile.open("logFile.txt");
 
     ifstream myfile;
     //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
             //fill the table of vectors with input from file
             if (i < how_many_rows)
             {
-                Input_Array[i] = new VectorElement(how_many_columns, mystring);
+                Input_Array[i] = new VectorElement(how_many_columns, mystring,0);
                 i++;
             }
         }
@@ -82,8 +83,8 @@ int main(int argc, char *argv[])
     myfile.close();
     myfile.clear();
 
-    myLogFile << "columns==== " << how_many_columns << endl;
-    myLogFile << "rows==== " << how_many_rows << endl;
+    cout << "columns==== " << how_many_columns << endl;
+    cout << "rows==== " << how_many_rows << endl;
 
     //--------DATA COLLECTED----------
 
@@ -91,15 +92,24 @@ int main(int argc, char *argv[])
     //Hash h(2500, how_many_columns);
 
     int k = 3;
+    int w = 4;
+    int N = 20;
+    int M = 30;
+    int probes = 1;
     //int d = pow(2,k);
 
-    HyperCube Cube_Obj(k);
+    HyperCube Cube_Obj(k,how_many_columns,w, N, M, probes);
 
+    for (int j = 0; j < how_many_rows; j++)
+    {
+       Cube_Obj.insertItem(Input_Array[j]);
+    }
 
-    
+    //Cube_Obj.displayCube();
+
 
     //COLUMNS?????? epanaipologismo????
-    //OPEN QUERY FILE AND PARSE EACH LINE
+    // //OPEN QUERY FILE AND PARSE EACH LINE
     ifstream myfilequery;
     myfilequery.open(FILE_NAME_QUERY);
     int query_rows = count(istreambuf_iterator<char>(myfilequery), istreambuf_iterator<char>(), '\n');
@@ -120,40 +130,47 @@ int main(int argc, char *argv[])
             // sso >> temp;
             if (query_i < query_rows)
             {
-                Query_Array[query_i] = new VectorElement(how_many_columns, mystring);
+                Query_Array[query_i] = new VectorElement(how_many_columns, mystring,0);
                 query_i++;
             }
         }
     }
     myfilequery.close();
 
-    //USED FOR TESTING
-    // for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
-    // {
-    //     for (int j = 0; j < query_rows; j++)
-    //     {
-    //         Hash_Array[i]->insertItem(Query_Array[j], r_array);
-    //     }
-    // }
+    Cube_Obj.initNeighboursInfo(query_rows);
 
-
-   
-    //---DELETE MEMORY---
-
-    delete[] r_array;
-
-    for (int i = 0; i < how_many_rows; i++)
+    for (int i = 0; i < query_rows; i++)
     {
-        Input_Array[i]->displayId();
+        //cout << "got" << endl;
+        Cube_Obj.getFirstProbe(Query_Array[i],i);
+        //cout << "got2" << endl;
     }
 
+    for (int i = 0; i < query_rows; i++)
+    {
+        for (int Ni = 0; Ni < N; Ni++)
+        {
+            cout << "id is: " << Cube_Obj.neighboursInfoTable[i]->arrayId[Ni]  << endl;
+            cout << "dist is: " << Cube_Obj.neighboursInfoTable[i]->arrayDistance[Ni]  << endl;
+        }
+    }
+
+    //---DELETE MEMORY---
+
+
+    
+    // for (int i = 0; i < how_many_rows; i++)
+    // {
+    //     Input_Array[i]->displayId();
+    // }
+    cout << "del" << endl;
     for (int i = 0; i < how_many_rows; i++)
     {
         delete Input_Array[i];
     }
     delete[] Input_Array;
 
-
+    cout << "del" << endl;
     for (int i = 0; i < query_rows; i++)
     {
         delete Query_Array[i];
@@ -161,11 +178,12 @@ int main(int argc, char *argv[])
 
     delete[] Query_Array;
 
-    myLogFile.close();
+    //myLogFile.close();
 
     // delete Vector_obj;
     // delete Vector_obj2;
     // delete Vector_obj3;
+
 
     return 0;
 }

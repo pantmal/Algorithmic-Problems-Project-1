@@ -2,6 +2,7 @@
 #include <ostream>
 #include <iostream>
 
+#include "TableF.h"
 
 TableF::TableF(){
 
@@ -16,8 +17,9 @@ int TableF::checkItem(int item){
     for (int i = 0; i < buckets; i++){
         list<int>::iterator hitr1;
         
-        for (hitr1= table[index].begin();hitr1 != table[index].end(); hitr1++) {
+        for (hitr1= table[i].begin();hitr1 != table[i].end(); hitr1++) {
             if (*hitr1 == item){
+                //cout << item << "+" << i <<endl;
                 pos = i;
                 break;
             }
@@ -44,7 +46,7 @@ void TableF::displayHash(){
 
 }
 
-~TableF::TableF(){
+TableF::~TableF(){
 
     delete[] table;
 }
