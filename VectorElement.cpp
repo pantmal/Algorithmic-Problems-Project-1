@@ -14,11 +14,11 @@ void VectorElement::displayId()
 
 void VectorElement::displayVectorElementArray()
 {
-    myLogFile << "---ELEMENT ARRAY---" << std::endl;
-    for (int i = 0; i < size; i++)
-    {
-        myLogFile << "VE element no: " << arrayVectorElement[i] << std::endl;
-    }
+    // myLogFile << "---ELEMENT ARRAY---" << std::endl;
+    // for (int i = 0; i < size; i++)
+    // {
+    //     myLogFile << "VE element no: " << arrayVectorElement[i] << std::endl;
+    // }
 }
 
 VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfHashTables)
@@ -57,7 +57,7 @@ void VectorElement::setDistanceRandom()
     distanceCurrQ = x + 1;
 }
 
-double VectorElement::getL2Distance(VectorElement *q)
+void VectorElement::getL2Distance(VectorElement *q)
 {
     double temp;
     double square;

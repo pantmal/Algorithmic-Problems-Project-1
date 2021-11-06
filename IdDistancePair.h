@@ -7,11 +7,12 @@ class idDistancePair
     double distance;
 
 public:
-    idDistancePair(int, int);
+    idDistancePair(int, double);
     void setId(int);
     void setDistance(int);
     int getId();
-    int getDistance();
+    double getDistance();
+    bool operator==(idDistancePair &);
 };
 
 #endif //IDDISTANCEPAIR_H

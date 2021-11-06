@@ -161,6 +161,7 @@ unsigned int Hash::getQueryTrickId(VectorElement *key, int *r_array)
 void Hash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int N) //j=no of query
 {
   int index = AmplifiedHashFunction(q, r_array);
+  // coutLineWithMessage(index, "THE INDEX IS:");
   list<VectorElement *>::iterator hitr1;
   list<VectorElement *>::iterator hitr2;
   // list<VectorElement *>::iterator hitr2;
@@ -179,21 +180,23 @@ void Hash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int 
   // {
   //   cout << "in this case we have to cut" << endl;
   // }
-
   int Ni = 0;
   //int arr[5];
   for (hitr2 = table[index].begin(); hitr2 != table[index].end(); ++hitr2)
   {
+    if (Ni == N)
+      break;
 
+    // cout << "size is: " << table[index].size() << endl;
+    // cout << "id is: " << neighboursInfoTable[j]->arrayId[Ni] << endl;
     VectorElement *vobj = *hitr2;
-
     neighboursInfoTable[j]->arrayDistance[Ni] = vobj->distanceCurrQ;
     neighboursInfoTable[j]->arrayId[Ni] = vobj->id;
+    // cout << "id is: " << neighboursInfoTable[j]->arrayId[Ni] << endl;
+
+    // cout << "distanceCurrQ: " << vobj->distanceCurrQ << endl;
+    // cout << "id: " << vobj->id << endl;
     Ni++;
-    if (Ni == N)
-    {
-      break;
-    }
   }
 
   // for (int i = 0; i < 5; i++)
@@ -224,6 +227,7 @@ void Hash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int 
   // hitr1 = table[index].begin();
   // hitr2 = table[index].end();
   // sort(hitr1, hitr2, cmp);
+  // coutLineWithMessage(index, "index:");
 }
 
 void Hash::insertItem(VectorElement *key, int *r_array)
@@ -302,10 +306,11 @@ void Hash::displayHash()
 // }
 void Hash::displayNeighbours(int N)
 {
+  myLogFile << "hash table no: " << this->hashTableNumber << endl;
   for (int i = 0; i < N; i++)
   {
-    cout << this->neighboursInfoTable[0]->arrayId[i] << endl;
-    cout << this->neighboursInfoTable[0]->arrayDistance[i] << endl;
+    myLogFile << "id is: " << this->neighboursInfoTable[0]->arrayId[i] << "  "
+              << "distance is: " << this->neighboursInfoTable[0]->arrayDistance[i] << endl;
   }
 }
 

@@ -27,7 +27,7 @@ public:
     void displayId();
     void displayVectorElementArray();
     void displayDistanceCurrQ();
-    double getL2Distance(VectorElement *);
+    void getL2Distance(VectorElement *);
 };
 
 #endif /* VECTORELEMENT_H */

@@ -3,7 +3,7 @@
 #include "Helpers.h"
 #include <list>
 #include <vector>
-
+#include <sstream>
 using namespace std;
 
 int testL2()
@@ -52,4 +52,16 @@ bool cmpListPair(idDistancePair &L, idDistancePair &R)
 {
     return L.getDistance() < R.getDistance();
 }
+bool cmpListPairR(idDistancePair &L, idDistancePair &R)
+{
+    return L.getId() < R.getId();
+}
+int string_into_int(const string &s)
+{
+    stringstream sso(s);
+    int x = 0;
+    sso >> x;
+    return x;
+}
+
 std::ofstream myLogFile;

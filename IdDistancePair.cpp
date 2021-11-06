@@ -1,7 +1,13 @@
 #include "idDistancePair.h"
 #include <iostream>
 using namespace std;
-idDistancePair::idDistancePair(int x, int y)
+bool idDistancePair::operator==(idDistancePair &Pair1)
+{
+    if (this->getId() != Pair1.getId())
+        return false;
+    return true;
+}
+idDistancePair::idDistancePair(int x, double y)
 {
     this->id = x;
     this->distance = y;
@@ -18,7 +24,7 @@ int idDistancePair::getId()
 {
     return id;
 }
-int idDistancePair::getDistance()
+double idDistancePair::getDistance()
 {
     return distance;
 }
