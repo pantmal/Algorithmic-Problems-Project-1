@@ -1,4 +1,4 @@
-#include "idDistancePair.h"
+#include "IdDistancePair.h"
 #include <iostream>
 using namespace std;
 bool idDistancePair::operator==(idDistancePair &Pair1)

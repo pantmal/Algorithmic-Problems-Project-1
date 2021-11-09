@@ -15,19 +15,19 @@
 
 #include "Neighbours.h"
 #include "VectorElement.h"
-#include "Hash.h"
+#include "LSHash.h"
 #include "Helpers.h"
-#include "idDistancePair.h"
+#include "IdDistancePair.h"
 
-// #define FILE_NAME_INPUT "DataTest.txt"
-// #define FILE_NAME_QUERY "QueryTest.txt"
+//#define FILE_NAME_INPUT "DataTest.txt"
+//#define FILE_NAME_QUERY "QueryTest.txt"
 #define FILE_NAME_INPUT "input_small_id"
 #define FILE_NAME_QUERY "query_small_id"
 
 #define NUMBER_OF_HASH_TABLES 5
-#define NUMBER_OF_BUCKETS 2
-#define NUMBER_OF_NEIGHBOURS 2
-#define RANGE 10000
+#define NUMBER_OF_BUCKETS 500
+#define NUMBER_OF_NEIGHBOURS 5
+#define RANGE 400
 
 // int NUMBER_OF_HASH_TABLES = 5;
 // int NUMBER_OF_BUCKETS = 10;
@@ -127,29 +127,11 @@ int main(int argc, char *argv[])
         r_array[i] = r_val;
     }
 
-    // coutLineWithMessage("input array");
-    // for (int i = 0; i < how_many_rows; i++)
-    // {
-    //     Input_Array[i]->displayId();
-    //     Input_Array[i]->displayVectorElementArray();
-    // }
-
-    //CHECK FOR ONE TABLE
-    // for (int j = 0; j < how_many_rows; j++)
-    // {
-    //     h.insertItem(Input_Array[j], r_array);
-    // }
-
-    // h.displayHash();
-    // coutLineWithMessage();
-
-    //HASH LIST
-    int L = 1;
-
-    Hash **Hash_Array = new Hash *[NUMBER_OF_HASH_TABLES];
+    
+    LSHash **Hash_Array = new LSHash *[NUMBER_OF_HASH_TABLES];
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
     {
-        Hash_Array[i] = new Hash(NUMBER_OF_BUCKETS, how_many_columns);
+        Hash_Array[i] = new LSHash(NUMBER_OF_BUCKETS, how_many_columns);
     }
 
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
@@ -200,6 +182,8 @@ int main(int argc, char *argv[])
     }
     myfilequery.close();
 
+
+
     //USED FOR TESTING
     // for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
     // {
@@ -217,171 +201,98 @@ int main(int argc, char *argv[])
     {
         Hash_Array[i]->initNeighboursInfo(query_rows, NUMBER_OF_NEIGHBOURS);
     }
-    list<idDistancePair> PairListR;
+
+    list<idDistancePair> PairList;
     coutLineWithMessage("CALCULATING DISTANCES");
-    coutLineWithMessage("NEAREST NEIGHBOURS RANGE SEARCH");
+    coutLineWithMessage("NEAREST NEIGHBOURS SEARCH");
     for (int i = 0; i < query_rows; i++) //for each hash table
     {
-        // cout << "new hast table: " << Hash_Array[i]->hashTableNumber << endl;
+        myLogFile << "Q: " << Query_Array[i]->id << endl;
+
+        //start time
+        std::chrono::steady_clock::time_point begin_bf = std::chrono::steady_clock::now();
+        
+        using clock = std::chrono::system_clock;
+        using sec = std::chrono::duration<double>;
+
+        const auto before_BF = clock::now();
+        list<idDistancePair> PairListBF;
+        for (int l = 0; l < how_many_rows; l++) //for each hash table
+        {
+            Input_Array[l]->getL2Distance(Query_Array[i]);
+            idDistancePair *Pair = new idDistancePair(Input_Array[l]->id, Input_Array[l]->distanceCurrQ);
+            PairListBF.push_back(*Pair);
+            delete Pair;
+        }
+        PairListBF.sort(cmpListPair);
+        
+        list<idDistancePair>::iterator hitrbf;
+        int currNeighboursbf = 0;
+        for (hitrbf = PairListBF.begin(); hitrbf != PairListBF.end(); ++hitrbf)
+        {
+            if (currNeighboursbf == NUMBER_OF_NEIGHBOURS) break;
+            // idDistancePair vobj = hitr1;
+            myLogFile << "Real Neighbour id: " << hitrbf->getId() << endl;
+            myLogFile << "Real Neighbour distance: " << hitrbf->getDistance() << endl;
+            currNeighboursbf++;
+        }
+        //get time
+        const sec duration_BF = clock::now() - before_BF;
+        myLogFile << "Time Brute Force = " << duration_BF.count() << "[s]" << endl;
+
+        //start time
+        const auto before_NN = clock::now();
         for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++) //for eacrh q of the queryset
         {
+            
             Hash_Array[j]->calculateDistanceAndFindN(Query_Array[i], r_array, i, NUMBER_OF_NEIGHBOURS);
-        }
-        for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++)
-        {
-            int index = Hash_Array[j]->AmplifiedHashFunction(Query_Array[i], r_array);
-            list<VectorElement *>::iterator hitr1;
-            for (hitr1 = Hash_Array[j]->table[index].begin(); hitr1 != Hash_Array[j]->table[index].end(); ++hitr1)
-            {
-                VectorElement *vobj = *hitr1;
-                if (vobj->distanceCurrQ <= RANGE)
-                {
-                    idDistancePair *insertToList = new idDistancePair(vobj->id, vobj->distanceCurrQ);
-                    // vobj->setDistanceRandom();
-                    PairListR.push_back(*insertToList);
-                    // cout << "init dist:" << vobj->distanceCurrQ << endl;
-                    delete insertToList;
-                }
-            }
-        }
-        PairListR.sort(cmpListPairR);
-        auto lastR = std::unique(PairListR.begin(), PairListR.end());
-        PairListR.erase(lastR, PairListR.end());
-        list<idDistancePair>::iterator hitr3;
-        coutLineWithMessage(i, "For query number:");
-        for (hitr3 = PairListR.begin(); hitr3 != PairListR.end(); ++hitr3)
-        {
-            cout << "Neighbour id: " << hitr3->getId() << endl;
-            cout << "Neighbour distance: " << hitr3->getDistance() << endl;
-        }
-        PairListR.clear();
-    }
-
-    //PRINT NEIGHBOURS TABLE
-    // for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
-    // {
-    //     Hash_Array[i]->displayNeighbours(query_rows);
-    // }
-
-    //CHECK THE ABOVE COMMENTS TO PRINT THE TABLE(DELETE THESE COMMENTS)
-    // -----PRINT NEIGHBOURS INFO--
-    //--coutLineWithMessage("NEIGHBOURS ARRAY");
-    // for (int i = 0; i < NUMBER_OF_NEIGHBOURS; i++)
-    // {
-    //     cout << "Id: " << Hash_Array[0]->neighboursInfoTable[0]->arrayId[i] << endl;
-    //     cout << "Distance: " << Hash_Array[0]->neighboursInfoTable[0]->arrayDistance[i] << endl;
-    // }
-
-    // list<VectorElement *>::iterator hitr1;
-    // for (hitr1 = Hash_Array[0]->table[0].begin(); hitr1 != Hash_Array[0]->table[0].end(); ++hitr1)
-    // {
-    //     VectorElement *vobj = *hitr1;
-    // cout << "id is: " << vobj->id << endl;
-    // cout << "query trick id is: " << vobj->QueryTrickid[0] << endl;
-    // cout << "init dist:" << vobj->distanceCurrQ << endl;
-    // }
-
-    // DISPLAY NEAREST NEIGHBOURS FOR EVERY QUERY
-    coutLineWithMessage("DISPLAYING NEIGHOURS");
-    list<idDistancePair> PairList;
-    cout << "nearest neighbours displayed are: " << NUMBER_OF_NEIGHBOURS << endl;
-    for (int i = 0; i < query_rows; i++)
-    {
-        cout << " For query number: " << i << endl;
-        for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++)
-        {
             // cout << "---Hash Table: " << j + 1 << " ---" << endl;
             for (int k = 0; k < NUMBER_OF_NEIGHBOURS; k++)
             {
                 idDistancePair *Pair = new idDistancePair(Hash_Array[j]->neighboursInfoTable[i]->arrayId[k], Hash_Array[j]->neighboursInfoTable[i]->arrayDistance[k]);
+                if (Pair->getDistance() == -1 || Pair->getDistance() == 0) break; //for sure?
                 PairList.push_back(*Pair);
-                // cout << "neighbour: " << k + 1 << " ";
-                // cout << "id:" << Hash_Array[j]->neighboursInfoTable[i]->arrayId[k] << " ";
-                // cout << "distance: " << Hash_Array[j]->neighboursInfoTable[i]->arrayDistance[k] << endl;
                 delete Pair;
             }
         }
+
         // PairList.erase(unique(PairList.begin(), PairList.end()), PairList.end());
         PairList.sort(cmpListPair);
         auto last = std::unique(PairList.begin(), PairList.end());
         PairList.erase(last, PairList.end());
-        list<idDistancePair>::iterator hitr1;
-        // list<idDistancePair>::iterator hitr2;
-        list<idDistancePair>::iterator hitr3;
+        
         int currNeighbours = 0;
         coutLineWithMessage("NEAREST NEIGHBOURS ARE: ");
+        list<idDistancePair>::iterator hitr1;
         for (hitr1 = PairList.begin(); hitr1 != PairList.end(); ++hitr1)
         {
-            if (currNeighbours == NUMBER_OF_NEIGHBOURS)
-                break;
+            if (currNeighbours == NUMBER_OF_NEIGHBOURS) break;
             // idDistancePair vobj = hitr1;
-            cout << " Neighbour id: " << hitr1->getId() << endl;
-            cout << "Neighbour distance: " << hitr1->getDistance() << endl;
+            myLogFile << "Neighbour id: " << hitr1->getId() << endl;
+            myLogFile << "Neighbour distance: " << hitr1->getDistance() << endl;
             currNeighbours++;
         }
-        // for (hitr2 = PairList.begin(); hitr2 != PairList.end(); ++hitr2)
-        // {
-        //     if (hitr2->getDistance() > RANGE)
-        //         break;
-        //     // idDistancePair vobj = hitr1;
-        //     cout << " Neighbour id: " << hitr2->getId() << endl;
-        //     cout << "Neighbour distance: " << hitr2->getDistance() << endl;
-        // }
-
+        //get time
+        const sec duration_NN = clock::now() - before_NN;
+        myLogFile << "Time LSH = " << duration_NN.count() << "[s]" << endl;
+        
         //reset the list for new q
-        PairList.clear();
+        PairList.clear();      
     }
 
-    // coutLineWithMessage("NEAREST NEIGHBOURS RANGE SEARCH");
-    // list<idDistancePair> PairListR;
-    // for (int i = 0; i < query_rows; i++)
-    // {
-    //     for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++)
-    //     {
-    //         int index = Hash_Array[j]->AmplifiedHashFunction(Query_Array[i], r_array);
-    //         list<VectorElement *>::iterator hitr1;
-    //         for (hitr1 = Hash_Array[j]->table[index].begin(); hitr1 != Hash_Array[j]->table[index].end(); ++hitr1)
-    //         {
-    //             VectorElement *vobj = *hitr1;
-    //             if (vobj->distanceCurrQ <= RANGE)
-    //             {
-    //                 idDistancePair *insertToList = new idDistancePair(vobj->id, vobj->distanceCurrQ);
-    //                 // vobj->setDistanceRandom();
-    //                 PairListR.push_back(*insertToList);
-    //                 // cout << "init dist:" << vobj->distanceCurrQ << endl;
-    //                 delete insertToList;
-    //             }
-    //         }
-    //     }
-    //     PairListR.sort(cmpListPairR);
-    //     auto lastR = std::unique(PairListR.begin(), PairListR.end());
-    //     PairListR.erase(lastR, PairListR.end());
-    //     list<idDistancePair>::iterator hitr3;
-    //     coutLineWithMessage(i, "For query number:");
-    //     for (hitr3 = PairListR.begin(); hitr3 != PairListR.end(); ++hitr3)
-    //     {
-    //         cout << " Neighbour id: " << hitr3->getId() << endl;
-    //         cout << "Neighbour distance: " << hitr3->getDistance() << endl;
-    //     }
-    //     PairListR.clear();
-    // }
+    for (int i = 0; i < query_rows; i++) //for each hash table
+    {
+        myLogFile << "RANGE for q: " << Query_Array[i]->id << endl;
+        //myLogFile << "Q: " << i << endl;
+        for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++) //for eacrh q of the queryset
+        {
+            //myLogFile << "HASH: " << j << endl;
+            Hash_Array[j]->RangeSearch(Query_Array[i], r_array, i, RANGE);            
+        }
+    }
 
-    // for (int i = 0; i < query_rows; i++)
-    // {
-    //     cout << "DISPLAY DISTANCE" << endl;
-    //     Query_ArrayNeighbours[i]->displayDistance();
-    //     cout << "DISPLAY ID" << endl;
-    //     Query_ArrayNeighbours[i]->displayID();
-    //     cout << "this works" << endl;
-    // }
-    // for (int i = 0; i < query_rows; i++)
-    // {
-    //     cout << "DISPLAY DISTANCE" << endl;
-    //     neighboursArray[i].displayDistance();
-    //     cout << "DISPLAY ID" << endl;
-    //     neighboursArray[i].displayID();
-    //     cout << "this works" << endl;
-    // }
+
+   
     //----CHECK DATA----
 
     //---CHECK NEIGHBOURS DATA----
@@ -390,6 +301,8 @@ int main(int argc, char *argv[])
     // coutLineWithMessage("NEIGHBOURS");
 
     //---DELETE MEMORY---
+
+    
 
     delete[] r_array;
 
@@ -418,10 +331,6 @@ int main(int argc, char *argv[])
     delete[] Query_Array;
 
     myLogFile.close();
-
-    // delete Vector_obj;
-    // delete Vector_obj2;
-    // delete Vector_obj3;
 
     return 0;
 }

@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "VectorElement.h"
-#include "Helpers.h"
+//#include "Helpers.h"
 
 using namespace std;
 
@@ -24,12 +24,15 @@ void VectorElement::displayVectorElementArray()
 VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfHashTables)
 {
     QueryTrickid = new unsigned int[numberOfHashTables]; //gets set when the vector element gets into a bucket
+    
     id = 0;
     double temp;
     int counter = 0;
     distanceCurrQ = 0;
+    
     size = dimensions;
     arrayVectorElement = new double[size];
+    
     std::stringstream sso(fileLine);
     sso >> id;
     while (sso >> temp)
@@ -76,4 +79,5 @@ VectorElement::~VectorElement()
 {
 
     delete[] arrayVectorElement;
+    delete[] QueryTrickid;
 }

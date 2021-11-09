@@ -18,7 +18,7 @@ public:
         }
     }
     neighboursInfo(int N);
-    ~neighboursInfo(); //TODO
+    ~neighboursInfo();
 };
 
 #endif //NEIGHBOURS_H

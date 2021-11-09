@@ -8,11 +8,17 @@
 
 neighboursInfo::neighboursInfo(int N)
 {
-    this->arrayId = new int[N]{-1};
-    this->arrayDistance = new double[N]{-1.0};
+    this->arrayId = new int[N];
+    this->arrayDistance = new double[N];
+    //std::cout << "constr" <<std::endl;
 }
 neighboursInfo::~neighboursInfo()
 {
+    //std::cout << "we get here" << std::endl;
+    //delete[] arrayId;
+    //std::cout << "we get here2" << std::endl;
+    //delete[] arrayDistance;
+    
 }
 
 using namespace std;

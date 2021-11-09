@@ -15,6 +15,7 @@ public:
     double *arrayVectorElement;
     double distanceCurrQ;
     unsigned int *QueryTrickid;
+    double silhouette_score;
 
 public:
     VectorElement(int, std::string, int);

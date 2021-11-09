@@ -1,7 +1,7 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 #include <list>
-#include "idDistancePair.h"
+#include "IdDistancePair.h"
 #include <string>
 
 extern std::ofstream myLogFile;

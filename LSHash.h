@@ -1,6 +1,6 @@
 
-#ifndef HASH_H
-#define HASH_H
+#ifndef LSHASH_H
+#define LSHASH_H
 
 #include <list>
 #include <ostream>
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-class Hash
+class LSHash
 {
 public:
     static int hashNumber;
@@ -25,6 +25,7 @@ public:
     neighboursInfo **neighboursInfoTable;
     double **array_of_v;
     double *array_of_t;
+    int query_rows_field;
 
     static int k_arg;
     static int w_arg;
@@ -42,11 +43,13 @@ public:
     }
     void calculateDistanceAndFindN(VectorElement *, int *r_array, int j, int N);
     void displayNeighbours(int);
+    void RangeSearch(VectorElement*, int*, int, double);
 
 public:
-    Hash(int V, int v_size);
+    LSHash(int V, int v_size);
 
     void initNeighboursInfo(int query_rows, int N);
+    void DeleteNeighborsInfo();
 
     void insertItem(VectorElement *x, int *r_array);
 
@@ -60,7 +63,7 @@ public:
     unsigned int getQueryTrickId(VectorElement *x, int *r_array);
     void displayHash();
 
-    ~Hash();
+    ~LSHash();
 };
 
-#endif /* HASH_H */
+#endif /* LSHASH_H */
