@@ -13,6 +13,7 @@
 #include "TableF.h"
 #include "HyperCube.h"
 #include "Neighbours.h"
+#include "Helpers.h"
 
 
 string getBinaryString(int num, int bits) {
@@ -35,7 +36,7 @@ int hammingDistance(string str1, string str2){
   return count;
 }
 
-HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int probes_arg){
+HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int probes_arg, double range_arg){
 
   N = N_arg;
   Ni = 0;
@@ -45,6 +46,8 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
   
   probes = probes_arg;
   probes_counter = 0;
+
+  range = range_arg;
 
   hammingCounter = 0;
 
@@ -96,17 +99,15 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
 void HyperCube::initNeighboursInfo(int query_rows)
 { //N =no of neighbours
 
-  for (int i = 0; i < query_rows; i++)
-  {
-    this->neighboursInfoTable = new neighboursInfo *[query_rows];
-  }
+  
+  this->neighboursInfoTable = new neighboursInfo*[query_rows];
+  
 
   for (int i = 0; i < query_rows; i++)
   {
-    for (int j = 0; j < N; j++)
-    {
-      this->neighboursInfoTable[j] = new neighboursInfo(N);
-    }
+    
+    this->neighboursInfoTable[i] = new neighboursInfo(N);
+    
   }
 
 }
@@ -151,7 +152,7 @@ int HyperCube::indexBuilder(VectorElement *key){
     }
 
     
-    cout << "int " << stoi(index_s,nullptr,2) << endl;
+    //cout << "int " << stoi(index_s,nullptr,2) << endl;
 
     int index = stoi(index_s,nullptr,2);
 
@@ -168,7 +169,7 @@ void HyperCube::insertItem(VectorElement *key){
 
 }
 
-void HyperCube::getFirstProbe(VectorElement *key, int j){
+void HyperCube::getFirstProbe(VectorElement *key, int j, string search){
 
   probesCandidates.clear();
   visited.clear();
@@ -178,13 +179,20 @@ void HyperCube::getFirstProbe(VectorElement *key, int j){
   probes_counter = 0;
 
   int index = indexBuilder(key);
-  cout << "inde" << index << endl;
-  calculateDistanceAndFindN(key,j,index);
+  
+  init_index = index;
+
+  if (search == "NN"){
+    calculateDistanceAndFindN(key,j,init_index);
+  }
+  else{
+    RangeSearch(key,j,index);
+  }
 
 }
 
 
-void HyperCube::getNextProbe(VectorElement *key, int j, int index){
+void HyperCube::getNextProbe(VectorElement *key, int j, int index, string search){
 
   if (probesCandidates.empty()){
 
@@ -230,7 +238,14 @@ void HyperCube::getNextProbe(VectorElement *key, int j, int index){
   //cout << item << endl;
   probesCandidates.erase(it);
 
-  calculateDistanceAndFindN(key, j, item);
+  //cout << item << endl;
+
+  if (search == "NN"){
+    calculateDistanceAndFindN(key,j,item);
+  }
+  else{
+    RangeSearch(key,j,item);
+  }
 
 
 }
@@ -238,6 +253,9 @@ void HyperCube::getNextProbe(VectorElement *key, int j, int index){
 void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
 
   //int index = indexBuilder(key);
+  if (table[index].size() == 0){
+    return;
+  }
 
   list<VectorElement *>::iterator hitr1;
   list<VectorElement *>::iterator hitr2;
@@ -262,6 +280,7 @@ void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
       break;
     }
 
+  
     VectorElement *vobj = *hitr2;
     neighboursInfoTable[j]->arrayDistance[Ni] = vobj->distanceCurrQ;
     neighboursInfoTable[j]->arrayId[Ni] = vobj->id;
@@ -277,12 +296,69 @@ void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
   if ( Ni < N){
     if (Mi != M){
       if (probes_counter != probes ){
-        cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
-        cout << "index " << index << endl;
-        getNextProbe(q,j,index);
+        // cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
+        // cout << "index " << index << endl;
+        getNextProbe(q,j,init_index,"NN");
       }
     }
   }
+
+
+}
+
+void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
+{
+
+  if (table[index].size() == 0){
+    return;
+  }
+
+  list<VectorElement *>::iterator hitr1;
+  list<VectorElement *>::iterator hitr2;
+
+  set<int> visited;
+
+  
+  for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
+  {
+    VectorElement *vobj = *hitr1;
+    vobj->getL2Distance(q);
+  }
+  table[index].sort(cmp);
+
+  
+  for (hitr2 = table[index].begin(); hitr2 != table[index].end(); ++hitr2)
+  {
+    
+    VectorElement *vobj = *hitr2;
+    if (vobj->distanceCurrQ <= range){
+
+      if (Mi == M) break;
+
+      bool visit_check = visited.find(vobj->id) != visited.end();
+      if (visit_check) continue;
+      
+      myLogFile <<"id" << vobj->id << endl;
+      myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+      
+      visited.insert(vobj->id);
+
+      Mi++;
+    }
+    
+  }
+
+  probes_counter++;
+
+  
+  if (Mi != M){
+    if (probes_counter != probes ){
+      // cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
+      // cout << "index " << index << endl;
+      getNextProbe(q,j,init_index,"range");
+    }
+  }
+  
 
 
 }

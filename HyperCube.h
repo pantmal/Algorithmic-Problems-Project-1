@@ -21,14 +21,7 @@ class HyperCube
     int k_cube;
     int w_cube;
 
-    int N;
-    int Ni;
-
-    int M;
-    int Mi;
-
-    int probes;
-    int probes_counter;
+    double range;
 
     // Pointer to an array containing buckets
     list<VectorElement * > *table;
@@ -42,17 +35,30 @@ class HyperCube
     set<int> visited;
 
 public:
+
+    int N;
+    int Ni;
+
+    int M;
+    int Mi;
+
+    int probes;
+    int probes_counter;
+
+    int init_index;
+
     neighboursInfo **neighboursInfoTable;
 
 
-    HyperCube(int, int, int, int, int, int);
+    HyperCube(int, int, int, int, int, int, double);
     void initNeighboursInfo(int);
     int functionF(int, int);
     int indexBuilder(VectorElement *x);
     void insertItem(VectorElement *x);
-    void getFirstProbe(VectorElement *x, int );
-    void getNextProbe(VectorElement *x, int , int );
+    void getFirstProbe(VectorElement *x, int, string );
+    void getNextProbe(VectorElement *x, int , int, string );
     void calculateDistanceAndFindN(VectorElement *x, int , int );
+    void RangeSearch(VectorElement *x, int , int );
     static bool cmp(VectorElement *L, VectorElement *R)
     {
         return L->distanceCurrQ < R->distanceCurrQ;
