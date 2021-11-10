@@ -93,7 +93,9 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
     TableOfValuesF[i] = new TableF();
    }
 
-    
+  cluster_mode = false;
+  current_cluster = 0;
+  assigned_total = 0;
 }
 
 void HyperCube::initNeighboursInfo(int query_rows)
@@ -186,7 +188,7 @@ void HyperCube::getFirstProbe(VectorElement *key, int j, string search){
     calculateDistanceAndFindN(key,j,init_index);
   }
   else{
-    RangeSearch(key,j,index);
+    RangeSearch(key,j,init_index);
   }
 
 }
@@ -203,7 +205,11 @@ void HyperCube::getNextProbe(VectorElement *key, int j, int index, string search
 
       if (!visited.empty()){
         bool visit_check = visited.find(bucket) != visited.end();
-        if (visit_check) continue;
+        if (visit_check){
+          //cout << "yup..." << endl;
+          continue;
+        }
+          
       }
       
 
@@ -230,6 +236,7 @@ void HyperCube::getNextProbe(VectorElement *key, int j, int index, string search
   unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
   default_random_engine e(seed);
   uniform_int_distribution<> U(0,probesCandidates.size()-1);
+  //cout << "size " << probesCandidates.size() << endl;
   int random_element = U(e);
       
   list<int>::iterator it = probesCandidates.begin();
@@ -318,7 +325,6 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
 
   set<int> visited;
 
-  
   for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
   {
     VectorElement *vobj = *hitr1;
@@ -337,9 +343,20 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
 
       bool visit_check = visited.find(vobj->id) != visited.end();
       if (visit_check) continue;
+
+      if (cluster_mode == true && vobj->assigned == true) continue;
+
       
-      myLogFile <<"id" << vobj->id << endl;
-      myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+      //myLogFile <<"id" << vobj->id << endl;
+      //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+      range_list.push_back(vobj);
+      
+      if (cluster_mode == true){
+        vobj->assigned = true;
+        vobj->assigned_clusters.push_back(current_cluster);
+        assigned_total++;
+      }
+      
       
       visited.insert(vobj->id);
 

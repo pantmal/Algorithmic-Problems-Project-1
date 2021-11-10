@@ -15,8 +15,8 @@
 
 using namespace std;
 
-int LSHash::k_arg = 5;
-int LSHash::w_arg = 100;
+//int LSHash::k_arg = 5;
+//int LSHash::w_arg = 100;
 
 int euclidean_mod(int a, unsigned int b)
 {
@@ -26,8 +26,12 @@ int euclidean_mod(int a, unsigned int b)
 
 
 int LSHash::hashNumber = 0;
-LSHash::LSHash(int b, int v_size)
+LSHash::LSHash(int b, int v_size, int k_arg, int w_arg)
 {
+
+  this->k_arg = k_arg;
+  this->w_arg = w_arg;
+
   hashTableNumber = hashNumber;
   hashNumber++;
   this->buckets = b;
@@ -61,6 +65,11 @@ LSHash::LSHash(int b, int v_size)
     double t = U(e);
     this->array_of_t[k] = t;
   }
+
+  cluster_mode = false;
+  current_cluster = 0;
+  assigned_total = 0;
+
 }
 
 void LSHash::initNeighboursInfo(int query_rows, int N)
@@ -183,8 +192,17 @@ void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //
       bool visit_check = visited.find(vobj->id) != visited.end();
       if (visit_check) continue;
       
-      myLogFile <<"id" << vobj->id << endl;
-      myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+      //myLogFile <<"id" << vobj->id << endl;
+      //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+      if (cluster_mode == true && vobj->assigned == true) continue;
+
+      range_list.push_back(vobj);
+      
+      if (cluster_mode == true){
+        vobj->assigned = true;
+        vobj->assigned_clusters.push_back(current_cluster);
+        assigned_total++;
+      }
       
       visited.insert(vobj->id);
     }

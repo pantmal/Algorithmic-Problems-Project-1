@@ -21,8 +21,6 @@ class HyperCube
     int k_cube;
     int w_cube;
 
-    double range;
-
     // Pointer to an array containing buckets
     list<VectorElement * > *table;
     double **array_of_v;
@@ -33,7 +31,6 @@ class HyperCube
     int hammingCounter;
     list<int> probesCandidates;
     set<int> visited;
-
 public:
 
     int N;
@@ -47,7 +44,15 @@ public:
 
     int init_index;
 
+    double range;
+
+    bool cluster_mode;
+    int current_cluster;
+    int assigned_total;
+
     neighboursInfo **neighboursInfoTable;
+
+    list<VectorElement * > range_list;
 
 
     HyperCube(int, int, int, int, int, int, double);

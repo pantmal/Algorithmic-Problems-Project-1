@@ -27,26 +27,32 @@ public:
     double *array_of_t;
     int query_rows_field;
 
-    static int k_arg;
-    static int w_arg;
+    int k_arg;
+    int w_arg; //may bring back static
+
+
+    bool cluster_mode;
+    int current_cluster;
+    int assigned_total;
+    list<VectorElement * > range_list;
 
     int temp;
 
 public:
-    static void set_k_arg(int temp)
-    {
-        k_arg = temp;
-    }
-    static int get_k_arg()
-    {
-        return k_arg;
-    }
+    // static void set_k_arg(int temp)
+    // {
+    //     k_arg = temp;
+    // }
+    // static int get_k_arg()
+    // {
+    //     return k_arg;
+    // }
     void calculateDistanceAndFindN(VectorElement *, int *r_array, int j, int N);
     void displayNeighbours(int);
     void RangeSearch(VectorElement*, int*, int, double);
 
 public:
-    LSHash(int V, int v_size);
+    LSHash(int V, int v_size, int, int);
 
     void initNeighboursInfo(int query_rows, int N);
     void DeleteNeighborsInfo();

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <list>
 
 class VectorElement
 {
@@ -16,6 +17,8 @@ public:
     double distanceCurrQ;
     unsigned int *QueryTrickid;
     double silhouette_score;
+    bool assigned;
+    std::list<int> assigned_clusters;
 
 public:
     VectorElement(int, std::string, int);

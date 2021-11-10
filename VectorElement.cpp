@@ -23,6 +23,9 @@ void VectorElement::displayVectorElementArray()
 
 VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfHashTables)
 {
+
+    assigned = false;
+
     QueryTrickid = new unsigned int[numberOfHashTables]; //gets set when the vector element gets into a bucket
     
     id = 0;
