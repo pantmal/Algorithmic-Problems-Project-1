@@ -218,7 +218,22 @@ int main(int argc, char *argv[])
     for (int i = 0; i < query_rows; i++) 
     {
         myLogFile << "RANGE for q: " << Query_Array[i]->id << endl;
+
+        list<VectorElement * > cube_range_list;
+        Cube_Obj.range_list = cube_range_list;
+        Cube_Obj.range = RANGE;
+
         Cube_Obj.getFirstProbe(Query_Array[i],i,"range");    
+
+
+        cube_range_list = Cube_Obj.range_list;
+        list<VectorElement *>::iterator hitr1;
+        for (hitr1 = cube_range_list.begin(); hitr1 != cube_range_list.end(); ++hitr1)
+        {
+            VectorElement *vobj = *hitr1;
+            myLogFile <<"id" << vobj->id << endl;
+            myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+        }
         
     }
 

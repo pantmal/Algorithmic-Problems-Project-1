@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
     //Hash h(2500, how_many_columns);
 
     int k_input = 5;
+    int w_arg = 100;
+
     //h.set_k_arg(5); //dont forget to update k and w args
 
     // R ARRAY IS HERE
@@ -131,7 +133,7 @@ int main(int argc, char *argv[])
     LSHash **Hash_Array = new LSHash *[NUMBER_OF_HASH_TABLES];
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
     {
-        Hash_Array[i] = new LSHash(NUMBER_OF_BUCKETS, how_many_columns);
+        Hash_Array[i] = new LSHash(NUMBER_OF_BUCKETS, how_many_columns,k_input,w_arg);
     }
 
     for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
@@ -284,11 +286,27 @@ int main(int argc, char *argv[])
     {
         myLogFile << "RANGE for q: " << Query_Array[i]->id << endl;
         //myLogFile << "Q: " << i << endl;
+        
         for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++) //for eacrh q of the queryset
         {
-            //myLogFile << "HASH: " << j << endl;
+            list<VectorElement * > lsh_range_list;
+            Hash_Array[j]->range_list = lsh_range_list;
+            //Hash_Array[j]->range = RANGE;
+            
             Hash_Array[j]->RangeSearch(Query_Array[i], r_array, i, RANGE);            
+            
+            lsh_range_list = Hash_Array[j]->range_list;
+            list<VectorElement *>::iterator hitr1;
+            for (hitr1 = lsh_range_list.begin(); hitr1 != lsh_range_list.end(); ++hitr1)
+            {
+                VectorElement *vobj = *hitr1;
+                myLogFile <<"id" << vobj->id << endl;
+                myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+            }
         }
+
+        
+
     }
 
 
