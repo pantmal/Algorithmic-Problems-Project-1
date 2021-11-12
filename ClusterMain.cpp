@@ -88,20 +88,22 @@ int main(int argc, char *argv[])
 
     //--------DATA COLLECTED----------
 
-    
-    int k = 4;
+    //PARAMS
+    int clusters = 4;
     int kdim = 3;
-    int w = 100;
-    int N = 0;
+    
     int M = 5000;
     int probes = 5;
 
     int NUMBER_OF_HASH_TABLES = 5;
-    int NUMBER_OF_BUCKETS = 500;
+    int NUMBER_OF_BUCKETS = how_many_rows/8;
+
+    int N = 0;
+    int w = 100;
 
     string assigner = "Classic";
 
-    KMeans kmeans_obj(assigner,k);
+    KMeans kmeans_obj(assigner,clusters);
     kmeans_obj.initialization(Input_Array,how_many_rows);
 
     int* r_array; 
@@ -173,15 +175,15 @@ int main(int argc, char *argv[])
 
         if (i!=3){
             //cout << "before last" <<endl;
-            for (int k1 = 0; k1 < k; k1++){
+            for (int k1 = 0; k1 < clusters; k1++){
                 kmeans_obj.ClusterArray[k1]->cluster_elements.clear();
             }
 
-            // if (kmeans_obj.assigner == "HyperCube"){
-            //     kmeans_obj.KMeans_Hyper->assigned_total = 0;    
-            // }else if(kmeans_obj.assigner == "LSH"){
-            //     kmeans_obj.KMeans_Hash_Array[0]->assigned_total = 0;
-            // }
+            if (kmeans_obj.assigner == "HyperCube"){ //This maybe fixes the error at LSH/HC output
+                kmeans_obj.KMeans_Hyper->assigned_total = 0;    
+            }else if(kmeans_obj.assigner == "LSH"){
+                kmeans_obj.KMeans_Hash_Array[0]->assigned_total = 0;
+            }
             
         }
         
@@ -197,7 +199,7 @@ int main(int argc, char *argv[])
         myLogFile << "Algorithm: Range Search LSH" << endl;
     }
 
-    for (int k1 = 0; k1 < k; k1++){
+    for (int k1 = 0; k1 < clusters; k1++){
 
         myLogFile << "CLUSTER-" << (k1+1) <<" {";
         int size = kmeans_obj.ClusterArray[k1]->cluster_elements.size();
@@ -209,14 +211,14 @@ int main(int argc, char *argv[])
 
     double silhouette_total = kmeans_obj.silhouette(how_many_rows);
     myLogFile << "Silhouette: [";
-    for (int k1 = 0; k1 < k; k1++){
+    for (int k1 = 0; k1 < clusters; k1++){
         double get_sil = kmeans_obj.ClusterArray[k1]->silhouette_cluster;
         myLogFile << "s" <<(k1+1)<<": "<< get_sil << ", ";
     }
     myLogFile << "stotal: " << silhouette_total << "]" << endl;
 
 
-    for (int k1 = 0; k1 < k; k1++){
+    for (int k1 = 0; k1 < clusters; k1++){
         myLogFile << "CLUSTER-" << (k1+1) <<" { centroid: [";
         kmeans_obj.ClusterArray[k1]->centroid->displayVectorElementArray();
         myLogFile << "], items: ";

@@ -24,20 +24,20 @@
 #define FILE_NAME_INPUT "input_small_id"
 #define FILE_NAME_QUERY "query_small_id"
 
-#define NUMBER_OF_HASH_TABLES 5
-#define NUMBER_OF_BUCKETS 500
-#define NUMBER_OF_NEIGHBOURS 5
-#define RANGE 350
 
-// int NUMBER_OF_HASH_TABLES = 5;
-// int NUMBER_OF_BUCKETS = 10;
-// int NUMBER_OF_NEIGHBOURS = 5;
-// int RANGE = 100;
 
 using namespace std;
 //this is some text
 int main(int argc, char *argv[])
 {
+
+    int k_input = 5;
+    int NUMBER_OF_HASH_TABLES = 5;
+
+    int NUMBER_OF_NEIGHBOURS = 5;
+    double RANGE = 350;
+
+    int w_arg = 100;
 
 
     //set up test logfile
@@ -112,10 +112,10 @@ int main(int argc, char *argv[])
     //CHECK FOR ONE TABLE
     //Hash h(2500, how_many_columns);
 
-    int k_input = 5;
-    int w_arg = 100;
-
     //h.set_k_arg(5); //dont forget to update k and w args
+
+
+    int NUMBER_OF_BUCKETS = how_many_rows/8;
 
     // R ARRAY IS HERE
     unsigned seed = chrono::steady_clock::now().time_since_epoch().count();

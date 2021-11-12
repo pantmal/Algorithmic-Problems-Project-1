@@ -22,9 +22,6 @@
 #define FILE_NAME_QUERY "query_small_id"
 
 
-#define NUMBER_OF_NEIGHBOURS 5
-#define RANGE 350
-
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -94,10 +91,13 @@ int main(int argc, char *argv[])
     //Hash h(2500, how_many_columns);
 
     int k = 3;
-    int w = 100;
-    int N = 5;
     int M = 900;
     int probes = 7;
+
+    int N = 5;
+    double RANGE = 350;
+
+    int w = 100;
     //int d = pow(2,k);
 
     HyperCube Cube_Obj(k,how_many_columns,w, N, M, probes, RANGE);
