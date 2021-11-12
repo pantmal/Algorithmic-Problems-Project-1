@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "VectorElement.h"
-//#include "Helpers.h"
+#include "Helpers.h"
 
 using namespace std;
 
@@ -15,10 +15,10 @@ void VectorElement::displayId()
 void VectorElement::displayVectorElementArray()
 {
     // myLogFile << "---ELEMENT ARRAY---" << std::endl;
-    // for (int i = 0; i < size; i++)
-    // {
-    //     myLogFile << "VE element no: " << arrayVectorElement[i] << std::endl;
-    // }
+    for (int i = 0; i < size; i++)
+    {
+        myLogFile << arrayVectorElement[i] << ", ";
+    }
 }
 
 VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfHashTables)

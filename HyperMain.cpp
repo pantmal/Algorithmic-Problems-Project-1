@@ -23,7 +23,7 @@
 
 
 #define NUMBER_OF_NEIGHBOURS 5
-#define RANGE 400
+#define RANGE 350
 
 using namespace std;
 
@@ -93,11 +93,11 @@ int main(int argc, char *argv[])
     //CHECK FOR ONE TABLE
     //Hash h(2500, how_many_columns);
 
-    int k = 10;
-    int w = 6;
-    int N = 100;
+    int k = 3;
+    int w = 100;
+    int N = 5;
     int M = 900;
-    int probes = 10;
+    int probes = 7;
     //int d = pow(2,k);
 
     HyperCube Cube_Obj(k,how_many_columns,w, N, M, probes, RANGE);
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < query_rows; i++)
     {
-        myLogFile << "Q: " << Query_Array[i]->id << endl;
+        myLogFile << "Query: " << Query_Array[i]->id << endl;
 
         list<idDistancePair> PairListBF;
         std::chrono::steady_clock::time_point begin_bf = std::chrono::steady_clock::now();
@@ -160,19 +160,19 @@ int main(int argc, char *argv[])
             delete Pair;
         }
         PairListBF.sort(cmpListPair);
-        
-        list<idDistancePair>::iterator hitrbf;
-        int currNeighboursbf = 0;
-        for (hitrbf = PairListBF.begin(); hitrbf != PairListBF.end(); ++hitrbf)
-        {
-            if (currNeighboursbf == N) break;
-            // idDistancePair vobj = hitr1;
-            myLogFile << "Real Neighbour id: " << hitrbf->getId() << endl;
-            myLogFile << "Real Neighbour distance: " << hitrbf->getDistance() << endl;
-            currNeighboursbf++;
-        }
         const sec duration_BF = clock::now() - before_BF;
-        myLogFile << "Time Brute Force = " << duration_BF.count() << "[s]" << endl;
+        // list<idDistancePair>::iterator hitrbf;
+        // int currNeighboursbf = 0;
+        // for (hitrbf = PairListBF.begin(); hitrbf != PairListBF.end(); ++hitrbf)
+        // {
+        //     if (currNeighboursbf == N) break;
+        //     // idDistancePair vobj = hitr1;
+        //     myLogFile << "Real Neighbour id: " << hitrbf->getId() << endl;
+        //     myLogFile << "Real Neighbour distance: " << hitrbf->getDistance() << endl;
+        //     currNeighboursbf++;
+        // }
+        
+        
 
         //cout << "got" << endl;
         const auto before_NN = clock::now();
@@ -198,26 +198,28 @@ int main(int argc, char *argv[])
             delete Pair;
         }
         PairList.sort(cmpListPair);
+        const sec duration_NN = clock::now() - before_NN;
         
         int currNeighbours = 0;
         coutLineWithMessage("NEAREST NEIGHBOURS ARE: ");
-        list<idDistancePair>::iterator hitr1;
-        for (hitr1 = PairList.begin(); hitr1 != PairList.end(); ++hitr1)
+        
+        list<idDistancePair>::iterator hitr1 = PairList.begin();
+        list<idDistancePair>::iterator hitrbf2 = PairListBF.begin();
+        for (; hitr1 != PairList.end() && hitrbf2 != PairListBF.end(); ++hitr1,++hitrbf2)
         {
             if (currNeighbours == N) break;
             // idDistancePair vobj = hitr1;
-            myLogFile << "Neighbour id: " << hitr1->getId() << endl;
-            myLogFile << "Neighbour distance: " << hitr1->getDistance() << endl;
+            myLogFile << "Nearest neighbor-"<<(currNeighbours+1) <<": " << hitr1->getId() << endl;
+            myLogFile << "distanceHypercube: " << hitr1->getDistance() << endl;
+            myLogFile << "distanceTrue: " << hitrbf2->getDistance() << endl;
+
             currNeighbours++;
         }
-        const sec duration_NN = clock::now() - before_NN;
-        myLogFile << "Time HyperCube = " << duration_NN.count() << "[s]" << endl;
+        
+        myLogFile << "tHypercube = " << duration_NN.count() << "[s]" << endl;
+        myLogFile << "tTrue = " << duration_BF.count() << "[s]" << endl;
 
-    }
-
-    for (int i = 0; i < query_rows; i++) 
-    {
-        myLogFile << "RANGE for q: " << Query_Array[i]->id << endl;
+        myLogFile << "R-near neighbors: " << endl;
 
         list<VectorElement * > cube_range_list;
         Cube_Obj.range_list = cube_range_list;
@@ -225,18 +227,15 @@ int main(int argc, char *argv[])
 
         Cube_Obj.getFirstProbe(Query_Array[i],i,"range");    
 
-
         cube_range_list = Cube_Obj.range_list;
-        list<VectorElement *>::iterator hitr1;
-        for (hitr1 = cube_range_list.begin(); hitr1 != cube_range_list.end(); ++hitr1)
+        list<VectorElement *>::iterator hitrR;
+        for (hitrR = cube_range_list.begin(); hitrR != cube_range_list.end(); ++hitrR)
         {
-            VectorElement *vobj = *hitr1;
-            myLogFile <<"id" << vobj->id << endl;
-            myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+            VectorElement *vobj = *hitrR;
+            myLogFile << vobj->id << endl;
+            //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
         }
-        
     }
-
 
     //---DELETE MEMORY---
 

@@ -302,7 +302,7 @@ void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
 
   if ( Ni < N){
     if (Mi != M){
-      if (probes_counter != probes ){
+      if (probes_counter != probes && probes_counter != buckets){
         // cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
         // cout << "index " << index << endl;
         getNextProbe(q,j,init_index,"NN");
@@ -369,7 +369,7 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
 
   
   if (Mi != M){
-    if (probes_counter != probes ){
+    if (probes_counter != probes && probes_counter != buckets){
       // cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
       // cout << "index " << index << endl;
       getNextProbe(q,j,init_index,"range");

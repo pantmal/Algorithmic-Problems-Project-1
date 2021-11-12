@@ -18,7 +18,7 @@ class Cluster
 public:
     int id;
     int size;
-    //isws centroid id
+    
     VectorElement* centroid;
     list<VectorElement*> cluster_elements;
     double silhouette_cluster;

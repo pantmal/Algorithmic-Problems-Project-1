@@ -102,7 +102,7 @@ void KMeans::initialization(VectorElement** Input_Array, int input_size){
 
         double x = Ux(e);
 
-        cout << "x " <<x << endl;
+        //cout << "x " <<x << endl;
 
         int index = 0;
         for (int p = 0; p < p_size;p++){ //may change to bin
@@ -297,7 +297,7 @@ void KMeans::ReverseAssignment(VectorElement** Input_Array, int how_many_rows){
     // }
 
     int count = 0;
-    cout << "assss" << assigned_total << endl;
+    //cout << "assss" << assigned_total << endl;
 
    
     if (assigned_total != how_many_rows){
@@ -325,7 +325,7 @@ void KMeans::ReverseAssignment(VectorElement** Input_Array, int how_many_rows){
             }
         }
     }
-    cout << "cc " << count << endl;
+    //cout << "cc " << count << endl;
 
     // for (int k = 0; k < clusters; k++){
     //     cout << "got to " << ClusterArray[k]->cluster_elements.size() << endl;
@@ -447,12 +447,12 @@ double KMeans::silhouette(int rows){
             silhouette_total += silhouette_curr;
         }
         ClusterArray[k]->silhouette_cluster = silhouette_in_cluster / list_size;
-        cout << "silhoutte in cluster: " << ClusterArray[k]->silhouette_cluster << endl;
+        //cout << "silhoutte in cluster: " << ClusterArray[k]->silhouette_cluster << endl;
     }
 
 
     silhouette_total = silhouette_total / rows;
-    cout << "silhoutte in total: " << silhouette_total << endl;
+    //cout << "silhoutte in total: " << silhouette_total << endl;
     return silhouette_total;
 }
 

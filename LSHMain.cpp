@@ -27,7 +27,7 @@
 #define NUMBER_OF_HASH_TABLES 5
 #define NUMBER_OF_BUCKETS 500
 #define NUMBER_OF_NEIGHBOURS 5
-#define RANGE 400
+#define RANGE 350
 
 // int NUMBER_OF_HASH_TABLES = 5;
 // int NUMBER_OF_BUCKETS = 10;
@@ -38,6 +38,7 @@ using namespace std;
 //this is some text
 int main(int argc, char *argv[])
 {
+
 
     //set up test logfile
     //ofstream myLogFile;
@@ -209,7 +210,7 @@ int main(int argc, char *argv[])
     coutLineWithMessage("NEAREST NEIGHBOURS SEARCH");
     for (int i = 0; i < query_rows; i++) //for each hash table
     {
-        myLogFile << "Q: " << Query_Array[i]->id << endl;
+        myLogFile << "Query: " << Query_Array[i]->id << endl;
 
         //start time
         std::chrono::steady_clock::time_point begin_bf = std::chrono::steady_clock::now();
@@ -219,6 +220,7 @@ int main(int argc, char *argv[])
 
         const auto before_BF = clock::now();
         list<idDistancePair> PairListBF;
+        //idDistancePair* output_real_NN = new idDistancePair*
         for (int l = 0; l < how_many_rows; l++) //for each hash table
         {
             Input_Array[l]->getL2Distance(Query_Array[i]);
@@ -228,19 +230,19 @@ int main(int argc, char *argv[])
         }
         PairListBF.sort(cmpListPair);
         
-        list<idDistancePair>::iterator hitrbf;
-        int currNeighboursbf = 0;
-        for (hitrbf = PairListBF.begin(); hitrbf != PairListBF.end(); ++hitrbf)
-        {
-            if (currNeighboursbf == NUMBER_OF_NEIGHBOURS) break;
-            // idDistancePair vobj = hitr1;
-            myLogFile << "Real Neighbour id: " << hitrbf->getId() << endl;
-            myLogFile << "Real Neighbour distance: " << hitrbf->getDistance() << endl;
-            currNeighboursbf++;
-        }
+        // list<idDistancePair>::iterator hitrbf;
+        // int currNeighboursbf = 0;
+        // for (hitrbf = PairListBF.begin(); hitrbf != PairListBF.end(); ++hitrbf)
+        // {
+        //     if (currNeighboursbf == NUMBER_OF_NEIGHBOURS) break;
+        //     // idDistancePair vobj = hitr1;
+        //     //myLogFile << "Real Neighbour id: " << hitrbf->getId() << endl;
+        //     //myLogFile << "Real Neighbour distance: " << hitrbf->getDistance() << endl;
+        //     currNeighboursbf++;
+        // }
         //get time
         const sec duration_BF = clock::now() - before_BF;
-        myLogFile << "Time Brute Force = " << duration_BF.count() << "[s]" << endl;
+        
 
         //start time
         const auto before_NN = clock::now();
@@ -262,31 +264,30 @@ int main(int argc, char *argv[])
         PairList.sort(cmpListPair);
         auto last = std::unique(PairList.begin(), PairList.end());
         PairList.erase(last, PairList.end());
-        
+        const sec duration_NN = clock::now() - before_NN;
+
+
         int currNeighbours = 0;
         coutLineWithMessage("NEAREST NEIGHBOURS ARE: ");
-        list<idDistancePair>::iterator hitr1;
-        for (hitr1 = PairList.begin(); hitr1 != PairList.end(); ++hitr1)
+        list<idDistancePair>::iterator hitr1 = PairList.begin();
+        list<idDistancePair>::iterator hitrbf2 = PairListBF.begin();
+        for (; hitr1 != PairList.end() && hitrbf2 != PairListBF.end(); ++hitr1,++hitrbf2)
         {
             if (currNeighbours == NUMBER_OF_NEIGHBOURS) break;
             // idDistancePair vobj = hitr1;
-            myLogFile << "Neighbour id: " << hitr1->getId() << endl;
-            myLogFile << "Neighbour distance: " << hitr1->getDistance() << endl;
+            myLogFile << "Nearest neighbor-"<<(currNeighbours+1) <<": " << hitr1->getId() << endl;
+            myLogFile << "distanceLSH: " << hitr1->getDistance() << endl;
+            myLogFile << "distanceTrue: " << hitrbf2->getDistance() << endl;
             currNeighbours++;
         }
         //get time
-        const sec duration_NN = clock::now() - before_NN;
-        myLogFile << "Time LSH = " << duration_NN.count() << "[s]" << endl;
+        myLogFile << "tLSH = " << duration_NN.count() << "[s]" << endl;
+        myLogFile << "tTrue = " << duration_BF.count() << "[s]" << endl;
         
         //reset the list for new q
         PairList.clear();      
-    }
 
-    for (int i = 0; i < query_rows; i++) //for each hash table
-    {
-        myLogFile << "RANGE for q: " << Query_Array[i]->id << endl;
-        //myLogFile << "Q: " << i << endl;
-        
+        myLogFile << "R-near neighbors: " << endl;
         for (int j = 0; j < NUMBER_OF_HASH_TABLES; j++) //for eacrh q of the queryset
         {
             list<VectorElement * > lsh_range_list;
@@ -300,15 +301,12 @@ int main(int argc, char *argv[])
             for (hitr1 = lsh_range_list.begin(); hitr1 != lsh_range_list.end(); ++hitr1)
             {
                 VectorElement *vobj = *hitr1;
-                myLogFile <<"id" << vobj->id << endl;
-                myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+                myLogFile << vobj->id << endl;
+                //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
             }
         }
 
-        
-
     }
-
 
    
     //----CHECK DATA----

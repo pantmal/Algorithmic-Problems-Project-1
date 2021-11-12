@@ -13,7 +13,7 @@
 //#include "Neighbours.h"
 #include "VectorElement.h"
 //#include "HyperCube.h"
-// #include "Helpers.h"
+#include "Helpers.h"
 #include "Cluster.h"
 #include "KMeans.h"
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     string mystring;
     string tempString;
 
-    //myLogFile.open("logFile.txt");
+    myLogFile.open("logFile.txt");
 
     ifstream myfile;
     //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     
     int k = 4;
     int kdim = 3;
-    int w = 4;
+    int w = 100;
     int N = 0;
     int M = 5000;
     int probes = 5;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     int NUMBER_OF_HASH_TABLES = 5;
     int NUMBER_OF_BUCKETS = 500;
 
-    string assigner = "LSH";
+    string assigner = "Classic";
 
     KMeans kmeans_obj(assigner,k);
     kmeans_obj.initialization(Input_Array,how_many_rows);
@@ -145,12 +145,18 @@ int main(int argc, char *argv[])
         }
     }
 
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        
+    using clock = std::chrono::system_clock;
+    using sec = std::chrono::duration<double>;
+
+    const auto before = clock::now();
 
     for (int i = 0; i < 4; i++) //4 == ITERANTIONS 
     {
         if (kmeans_obj.assigner == "Classic"){
             kmeans_obj.ClassicAssignment(Input_Array, how_many_rows);
-        }else if (kmeans_obj.assigner == "HyperCube") {
+        }else if (kmeans_obj.assigner == "HyperCube" || kmeans_obj.assigner == "LSH") {
             kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
         }else{
             kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
@@ -166,29 +172,63 @@ int main(int argc, char *argv[])
 
 
         if (i!=3){
-            cout << "before last" <<endl;
+            //cout << "before last" <<endl;
             for (int k1 = 0; k1 < k; k1++){
                 kmeans_obj.ClusterArray[k1]->cluster_elements.clear();
             }
+
+            // if (kmeans_obj.assigner == "HyperCube"){
+            //     kmeans_obj.KMeans_Hyper->assigned_total = 0;    
+            // }else if(kmeans_obj.assigner == "LSH"){
+            //     kmeans_obj.KMeans_Hash_Array[0]->assigned_total = 0;
+            // }
+            
         }
         
     }
     
+    const sec duration = clock::now() - before;
+
+    if (assigner == "Classic"){
+        myLogFile << "Algorithm: Lloyds" << endl;
+    }else if (assigner == "HyperCube"){
+        myLogFile << "Algorithm: Range Search Hypercube" << endl;
+    }else{
+        myLogFile << "Algorithm: Range Search LSH" << endl;
+    }
+
+    for (int k1 = 0; k1 < k; k1++){
+
+        myLogFile << "CLUSTER-" << (k1+1) <<" {";
+        int size = kmeans_obj.ClusterArray[k1]->cluster_elements.size();
+        myLogFile << "size: " << size <<", centroid: [";
+        kmeans_obj.ClusterArray[k1]->centroid->displayVectorElementArray();
+        myLogFile << "]" << endl;
+    }
+    myLogFile << "clustering_time: "<< duration.count() << "[s]" << endl;
+
     double silhouette_total = kmeans_obj.silhouette(how_many_rows);
-
-    //CHECK FOR ONE TABLE
-    //Hash h(2500, how_many_columns);
-
-    //int k = 3;
-    
-    //int d = pow(2,k);
-
-    //Cube_Obj.displayCube();
+    myLogFile << "Silhouette: [";
+    for (int k1 = 0; k1 < k; k1++){
+        double get_sil = kmeans_obj.ClusterArray[k1]->silhouette_cluster;
+        myLogFile << "s" <<(k1+1)<<": "<< get_sil << ", ";
+    }
+    myLogFile << "stotal: " << silhouette_total << "]" << endl;
 
 
-    
+    for (int k1 = 0; k1 < k; k1++){
+        myLogFile << "CLUSTER-" << (k1+1) <<" { centroid: [";
+        kmeans_obj.ClusterArray[k1]->centroid->displayVectorElementArray();
+        myLogFile << "], items: ";
 
-
+        list<VectorElement *>::iterator hitr1;
+        for (hitr1 = kmeans_obj.ClusterArray[k1]->cluster_elements.begin(); hitr1 != kmeans_obj.ClusterArray[k1]->cluster_elements.end(); ++hitr1)
+        {
+            VectorElement *vobg = *hitr1;
+            myLogFile << vobg->id << ", ";
+        }
+        myLogFile << "}" << endl;
+    }
     //---DELETE MEMORY---
 
 
@@ -215,7 +255,7 @@ int main(int argc, char *argv[])
             delete[] kmeans_obj.KMeans_Hash_Array;
     }
 
-    //myLogFile.close();
+    myLogFile.close();
 
     // delete Vector_obj;
     // delete Vector_obj2;
