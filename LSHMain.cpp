@@ -21,21 +21,21 @@
 
 //#define FILE_NAME_INPUT "DataTest.txt"
 //#define FILE_NAME_QUERY "QueryTest.txt"
-#define FILE_NAME_INPUT "input_small_id"
-#define FILE_NAME_QUERY "query_small_id"
-
 
 
 using namespace std;
-//this is some text
+
 int main(int argc, char *argv[])
 {
 
-    int k_input = 5;
-    int NUMBER_OF_HASH_TABLES = 5;
+    string FILE_NAME_INPUT = "input_small_id"; //PARAM <input file>
+    string FILE_NAME_QUERY = "query_small_id"; //PARAM <query file>
 
-    int NUMBER_OF_NEIGHBOURS = 5;
-    double RANGE = 350;
+    int k_input = 5; //PARAM <k>
+    int NUMBER_OF_HASH_TABLES = 5; //PARAM <L>
+
+    int NUMBER_OF_NEIGHBOURS = 5; //PARAM <N>
+    double RANGE = 350; //PARAM <radius>
 
     int w_arg = 100;
 
@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
     string mystring;
     string tempString;
 
-    myLogFile.open("logFile.txt");
+    myLogFile.open("logFile.txt"); //PARAM <output file>
+
     ifstream myfile;
     //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
     myfile.open(FILE_NAME_INPUT);

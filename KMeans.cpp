@@ -13,6 +13,49 @@
 #include "VectorElement.h"
 
 
+int findClosest(double arr[], int n, double target)
+{
+    // Corner cases
+    if (target <= arr[0])
+        return 0;
+    if (target >= arr[n - 1])
+        return n - 1;
+ 
+    // Doing binary search
+    int i = 0, j = n, mid = 0;
+    while (i < j) {
+        mid = (i + j) / 2;
+ 
+        if (arr[mid] == target)
+            return mid;
+ 
+        /* If target is less than array element,
+            then search in left */
+        if (target < arr[mid]) {
+ 
+            // If target is greater than previous
+            // to mid, return closest of two
+            if (mid > 0 && target > arr[mid - 1])
+                return mid;
+ 
+            /* Repeat for left half */
+            j = mid;
+        }
+ 
+        // If target is greater than mid
+        else {
+            if (mid < n - 1 && target < arr[mid + 1])
+                return mid+1;
+            // update i
+            i = mid + 1;
+        }
+    }
+ 
+    // Only single element left after search
+    return mid;
+}
+
+
 KMeans::KMeans(string assigner_arg, int clusters_arg){
 
 
@@ -49,6 +92,41 @@ void KMeans::initialization(VectorElement** Input_Array, int input_size){
         VectorElement** centroid_candidates = new VectorElement*[p_size];
         
         double curr_sum = 0.0;
+
+        double max_dist_all = -1.0;
+        for (int i = 0; i < input_size; i++){
+            bool is_centroid = false;
+            for (int c = 0; c < (t_counter+1); c++){
+                if (Input_Array[i]->id == init_centroids[c]->id){
+                    is_centroid = true;
+                }
+            }
+
+            if (is_centroid) continue;
+
+            double min_dist = DBL_MAX;
+            int min_id = -1;
+            for (int k = 0; k < (t_counter+1); k++){
+
+                VectorElement *vobj = Input_Array[i];
+                vobj->getL2Distance(ClusterArray[k]->centroid);
+
+                if (vobj->distanceCurrQ < min_dist){
+                    min_dist = vobj->distanceCurrQ;
+                    //min_id = ClusterArray[k]->id;
+                } 
+            }
+
+            if (min_dist > max_dist_all){
+                max_dist_all = min_dist;
+                //max_dist_all = pow(min_dist,2);
+            }
+
+        }
+
+
+        //cout << "max_dist_all " << max_dist_all <<endl;
+
         for (int i = 0; i < input_size; i++){
             bool is_centroid = false;
             for (int c = 0; c < (t_counter+1); c++){
@@ -74,6 +152,7 @@ void KMeans::initialization(VectorElement** Input_Array, int input_size){
 
             //cout << "dist is  " << min_dist << endl;
 
+            min_dist = min_dist / max_dist_all;
             double dist = pow(min_dist,2);
 
             //dist = dist/min_dist;
@@ -93,7 +172,7 @@ void KMeans::initialization(VectorElement** Input_Array, int input_size){
         // }
 
         // for (int p = 0; p < p_size;p++){
-        //     cout << p_array[p] << endl;
+        //    myLogFile << p_array[p] << endl;
         // }
 
         //cout << "mp" << max_p <<" " <<curr_sum <<" " <<p_array[p_size-1] << endl;
@@ -104,18 +183,8 @@ void KMeans::initialization(VectorElement** Input_Array, int input_size){
 
         //cout << "x " <<x << endl;
 
-        int index = 0;
-        for (int p = 0; p < p_size;p++){ //may change to bin
-            if (x <= p_array[p]){
-                if (p==0){
-                    break;
-                }
-                if (x > p_array[p-1]){
-                    index = p;
-                    break;
-                }
-            }
-        }
+        int index = findClosest(p_array,p_size,x);
+        //cout << "index " << index << " " << p_array[index] << endl;
         
         t_counter++;
         VectorElement* v_obg = centroid_candidates[index]; 
@@ -282,19 +351,6 @@ void KMeans::ReverseAssignment(VectorElement** Input_Array, int how_many_rows){
         }
 
     }
- // for (int k = 0; k < clusters; k++){
-    //     cout << "displaying centroid "<< k <<" before update" << endl;
-    //     for (int j = 0; j < 128; j++){
-    //         if (j==0){
-    //             cout <<"1 " <<ClusterArray[k]->centroid->arrayVectorElement[j] << endl;
-    //         }
-    //         if (j==1){
-    //             cout << "2 " << ClusterArray[k]->centroid->arrayVectorElement[j] << endl;
-    //         }
-    //    //     cout << ClusterArray[k]->centroid->arrayVectorElement[j] << endl;
-    //     }
-
-    // }
 
     int count = 0;
     //cout << "assss" << assigned_total << endl;
@@ -359,9 +415,6 @@ void KMeans::update(int columns){
             {
                 VectorElement *vobg = *hitr1;
                 curr_sum += vobg->arrayVectorElement[j];
-                //if (j==0){
-                //    cout <<"cs " <<curr_sum << endl;
-               // }
                 
             }
             ClusterArray[k]->centroid->arrayVectorElement[j] = curr_sum;
@@ -375,12 +428,6 @@ void KMeans::update(int columns){
         for (int j = 0; j < columns; j++){
 
             double mean = ClusterArray[k]->centroid->arrayVectorElement[j] / list_size;
-            // if (j==0){
-            //     cout << "mean " << mean << endl;
-            // }
-            // if (j==1){
-            //     cout << "mean2 " << mean << endl;
-            // }
             ClusterArray[k]->centroid->arrayVectorElement[j] = mean;
         }
     }
@@ -393,12 +440,18 @@ void KMeans::update(int columns){
 double KMeans::silhouette(int rows){
 
 
+    if (clusters == 1){
+        double silhouette_total = 0;
+        return silhouette_total;
+    }
+
     double silhouette_total = 0.0;
     for (int k = 0; k < clusters; k++){
 
         double silhouette_in_cluster = 0.0;
 
         int list_size = ClusterArray[k]->cluster_elements.size();
+        int list_size_B = 0;
         for (list<VectorElement *>::iterator hitr1 = ClusterArray[k]->cluster_elements.begin(); hitr1 != ClusterArray[k]->cluster_elements.end(); ++hitr1){
             VectorElement *curr_element = *hitr1;
             
@@ -413,7 +466,7 @@ double KMeans::silhouette(int rows){
             a_dists = a_dists / list_size;
         
 
-            double min_dist = DBL_MAX; //maybe outside for?
+            double min_dist = DBL_MAX;
             int min_id = -1;
             for (int k2 = 0; k2 < clusters; k2++){
                 if (ClusterArray[k2]->id == ClusterArray[k]->id) continue;
@@ -426,7 +479,7 @@ double KMeans::silhouette(int rows){
             }
 
             double b_dists = 0.0;
-            int list_size_B = ClusterArray[min_id]->cluster_elements.size();
+            list_size_B = ClusterArray[min_id]->cluster_elements.size();
             for (list<VectorElement *>::iterator hitr3 = ClusterArray[min_id]->cluster_elements.begin(); hitr3 != ClusterArray[min_id]->cluster_elements.end(); ++hitr3){
                 VectorElement *vobg3 = *hitr3;
                 curr_element->getL2Distance(vobg3);
@@ -446,10 +499,14 @@ double KMeans::silhouette(int rows){
             silhouette_in_cluster += silhouette_curr;
             silhouette_total += silhouette_curr;
         }
-        ClusterArray[k]->silhouette_cluster = silhouette_in_cluster / list_size;
+        if (list_size <= 1 || list_size_B <= 1){
+            ClusterArray[k]->silhouette_cluster = 0;
+        }else{
+            ClusterArray[k]->silhouette_cluster = silhouette_in_cluster / list_size;
+        }
+        
         //cout << "silhoutte in cluster: " << ClusterArray[k]->silhouette_cluster << endl;
     }
-
 
     silhouette_total = silhouette_total / rows;
     //cout << "silhoutte in total: " << silhouette_total << endl;

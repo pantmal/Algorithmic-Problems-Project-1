@@ -66,7 +66,6 @@ public:
     }
 
     int AmplifiedHashFunction(VectorElement *x, int *r_array);
-    unsigned int getQueryTrickId(VectorElement *x, int *r_array);
     void displayHash();
 
     ~LSHash();

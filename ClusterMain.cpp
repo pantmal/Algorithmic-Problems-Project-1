@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     //--------DATA COLLECTED----------
 
     //PARAMS
-    int clusters = 4;
+    int clusters = 5;
     int kdim = 3;
     
     int M = 5000;
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     int N = 0;
     int w = 100;
 
-    string assigner = "Classic";
+    string assigner = "HyperCube";
 
     KMeans kmeans_obj(assigner,clusters);
     kmeans_obj.initialization(Input_Array,how_many_rows);
@@ -160,8 +160,6 @@ int main(int argc, char *argv[])
             kmeans_obj.ClassicAssignment(Input_Array, how_many_rows);
         }else if (kmeans_obj.assigner == "HyperCube" || kmeans_obj.assigner == "LSH") {
             kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
-        }else{
-            kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
         }
         
         kmeans_obj.update(how_many_columns);
@@ -213,6 +211,10 @@ int main(int argc, char *argv[])
     myLogFile << "Silhouette: [";
     for (int k1 = 0; k1 < clusters; k1++){
         double get_sil = kmeans_obj.ClusterArray[k1]->silhouette_cluster;
+        if (get_sil == 0){
+            myLogFile << "Silhouette is undefined, ";    
+            continue;
+        }
         myLogFile << "s" <<(k1+1)<<": "<< get_sil << ", ";
     }
     myLogFile << "stotal: " << silhouette_total << "]" << endl;
@@ -235,11 +237,6 @@ int main(int argc, char *argv[])
 
 
     
-    // for (int i = 0; i < how_many_rows; i++)
-    // {
-    //     Input_Array[i]->displayId();
-    // }
-    //cout << "del" << endl;
     for (int i = 0; i < how_many_rows; i++)
     {
         delete Input_Array[i];
@@ -258,10 +255,6 @@ int main(int argc, char *argv[])
     }
 
     myLogFile.close();
-
-    // delete Vector_obj;
-    // delete Vector_obj2;
-    // delete Vector_obj3;
 
 
     return 0;

@@ -18,14 +18,17 @@
 
 //#define FILE_NAME_INPUT "DataTest.txt"
 //#define FILE_NAME_QUERY "QueryTest.txt"
-#define FILE_NAME_INPUT "input_small_id"
-#define FILE_NAME_QUERY "query_small_id"
+
 
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+
+    string FILE_NAME_INPUT = "input_small_id"; //PARAM <input file>
+    string FILE_NAME_QUERY = "query_small_id"; //PARAM <query file>
+
     //set up test logfile
     //ofstream myLogFile;
     bool justOnce = true;
@@ -35,7 +38,7 @@ int main(int argc, char *argv[])
     string mystring;
     string tempString;
 
-    myLogFile.open("logFile.txt");
+    myLogFile.open("logFile.txt"); //PARAM <output file>
 
     ifstream myfile;
     //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
@@ -90,12 +93,12 @@ int main(int argc, char *argv[])
     //CHECK FOR ONE TABLE
     //Hash h(2500, how_many_columns);
 
-    int k = 3;
-    int M = 900;
-    int probes = 7;
+    int k = 3; //PARAM <k>
+    int M = 900; //PARAM <M>
+    int probes = 7; //PARAM <probes>
 
-    int N = 5;
-    double RANGE = 350;
+    int N = 5; //PARAM <number of nearest>
+    double RANGE = 350; //PARAM <radius>
 
     int w = 100;
     //int d = pow(2,k);
