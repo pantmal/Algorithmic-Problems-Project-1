@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         cin >> input;
         FILE_NAME_LOG = input;
     }
-    if (argc < 4 && argc != 1)
+    if (argc < 7 && argc != 1)
     {
         cout << "not appropriate number of arguments,programme will terminate " << endl;
         exit(0);
