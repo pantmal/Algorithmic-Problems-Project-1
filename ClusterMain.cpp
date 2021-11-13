@@ -19,8 +19,10 @@
 
 //#define FILE_NAME_INPUT "DataTest.txt"
 //#define FILE_NAME_QUERY "QueryTest.txt"
-#define FILE_NAME_INPUT "input_small_id"
+#define FILE_NAME_INPUT "input_small_id" //PARAM input_file (change this to var)
 
+//PARAM configuration file
+//PARAM complete (boolean true or false)
 
 using namespace std;
 
@@ -36,7 +38,7 @@ int main(int argc, char *argv[])
     string mystring;
     string tempString;
 
-    myLogFile.open("logFile.txt");
+    myLogFile.open("logFile.txt"); //PARAM output_file
 
     ifstream myfile;
     //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
@@ -89,25 +91,26 @@ int main(int argc, char *argv[])
     //--------DATA COLLECTED----------
 
     //PARAMS
-    int clusters = 5;
-    int kdim = 3;
+    int clusters = 5; //PARAM <number_of_clusters> from .conf
+    int kinput = 3; //PARAM <number_of_vector_hash_functions> from .conf
+    int kdim = 3; //PARAM <number_of_hypercube_dimensions> from .conf
     
-    int M = 5000;
-    int probes = 5;
+    int M = 5000; //PARAM <max_number_M_hypercube> from .conf
+    int probes = 5; //PARAM <number_of_probes> from .conf
 
-    int NUMBER_OF_HASH_TABLES = 5;
+    int NUMBER_OF_HASH_TABLES = 5; //PARAM <number_of_vector_hash_tables> from .conf
     int NUMBER_OF_BUCKETS = how_many_rows/8;
 
     int N = 0;
     int w = 100;
 
-    string assigner = "HyperCube";
+    string assigner = "Hypercube"; //PARAM method
 
     KMeans kmeans_obj(assigner,clusters);
     kmeans_obj.initialization(Input_Array,how_many_rows);
 
     int* r_array; 
-    if (kmeans_obj.assigner == "HyperCube"){
+    if (kmeans_obj.assigner == "Hypercube"){
         kmeans_obj.KMeans_Hyper = new HyperCube(kdim,how_many_columns,w, N, M, probes, 0.0);
         kmeans_obj.KMeans_Hyper->cluster_mode = true;
 
@@ -121,17 +124,17 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
         {
-            kmeans_obj.KMeans_Hash_Array[i] = new LSHash(NUMBER_OF_BUCKETS, how_many_columns, kdim,w);
+            kmeans_obj.KMeans_Hash_Array[i] = new LSHash(NUMBER_OF_BUCKETS, how_many_columns, kinput,w);
             kmeans_obj.KMeans_Hash_Array[i]->cluster_mode = true;
         }
 
         unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
         default_random_engine e(seed);
         uniform_int_distribution<> Ur(0, INT_MAX);
-        r_array = new int[kdim]; 
+        r_array = new int[kinput]; 
 
         
-        for (int i = 0; i < kdim; i++)
+        for (int i = 0; i < kinput; i++)
         {
             int r_val = Ur(e);
             r_array[i] = r_val;
@@ -158,7 +161,7 @@ int main(int argc, char *argv[])
     {
         if (kmeans_obj.assigner == "Classic"){
             kmeans_obj.ClassicAssignment(Input_Array, how_many_rows);
-        }else if (kmeans_obj.assigner == "HyperCube" || kmeans_obj.assigner == "LSH") {
+        }else if (kmeans_obj.assigner == "Hypercube" || kmeans_obj.assigner == "LSH") {
             kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
         }
         
@@ -177,7 +180,7 @@ int main(int argc, char *argv[])
                 kmeans_obj.ClusterArray[k1]->cluster_elements.clear();
             }
 
-            if (kmeans_obj.assigner == "HyperCube"){ //This maybe fixes the error at LSH/HC output
+            if (kmeans_obj.assigner == "Hypercube"){ //This maybe fixes the error at LSH/HC output
                 kmeans_obj.KMeans_Hyper->assigned_total = 0;    
             }else if(kmeans_obj.assigner == "LSH"){
                 kmeans_obj.KMeans_Hash_Array[0]->assigned_total = 0;
@@ -191,7 +194,7 @@ int main(int argc, char *argv[])
 
     if (assigner == "Classic"){
         myLogFile << "Algorithm: Lloyds" << endl;
-    }else if (assigner == "HyperCube"){
+    }else if (assigner == "Hypercube"){
         myLogFile << "Algorithm: Range Search Hypercube" << endl;
     }else{
         myLogFile << "Algorithm: Range Search LSH" << endl;
@@ -243,7 +246,7 @@ int main(int argc, char *argv[])
     }
     delete[] Input_Array;
 
-    if (kmeans_obj.assigner == "HyperCube"){
+    if (kmeans_obj.assigner == "Hypercube"){
         delete kmeans_obj.KMeans_Hyper;
     }else if (kmeans_obj.assigner == "LSH"){
         delete[] r_array;
