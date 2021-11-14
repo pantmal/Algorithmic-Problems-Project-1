@@ -14,10 +14,11 @@ neighboursInfo::neighboursInfo(int N)
 }
 neighboursInfo::~neighboursInfo()
 {
-    //std::cout << "we get here" << std::endl;
-    //delete[] arrayId;
-    //std::cout << "we get here2" << std::endl;
-    //delete[] arrayDistance;
+   
+    // std::cout << "we get here" << std::endl;
+    // delete[] arrayId;
+    // std::cout << "we get here2" << std::endl;
+    // delete[] arrayDistance;
     
 }
 

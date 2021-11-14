@@ -8,6 +8,67 @@
 #include <sstream>
 using namespace std;
 
+
+int euclidean_mod(int a, unsigned int b){
+  int r = a % b;
+  return r >= 0 ? r : r + b; 
+}
+
+
+string getBinaryString(int num, int bits) {
+    vector<char> digits(bits);
+    for (int i = 0; i < bits; ++i) {
+      digits.push_back(num % 2 + '0');
+      num >>= 1;  
+    }
+    return string(digits.rbegin(), digits.rend());
+}
+
+int hammingDistance(string str1, string str2){
+  int i = 0, count = 0;
+  while (str1[i] != '\0')
+  {
+    if (str1[i] != str2[i])
+      count++;
+    i++;
+  }
+  return count;
+}
+
+int binarySearch(double array[], double target, int size){
+    
+    if (target <= array[0]) return 0;
+    
+    
+    if (target >= array[size - 1]) return size - 1;
+ 
+    
+    int i = 0, j = size, mid = 0;
+    while (i < j) {
+
+        mid = (i + j) / 2;
+ 
+        if (array[mid] == target) return mid;
+ 
+        if (target < array[mid]) {
+ 
+            if (mid > 0 && target > array[mid - 1]) return mid;
+ 
+            j = mid;
+        }
+ 
+        
+        else {
+            if (mid < size - 1 && target < array[mid + 1]) return mid+1;
+        
+            i = mid + 1;
+        }
+    }
+ 
+    return mid;
+}
+
+
 int testL2()
 {
     unsigned long x;
@@ -30,26 +91,6 @@ void logFileLineWithMessage(std::string m)
     myLogFile << "------" << m << "------" << std::endl;
 }
 
-// void neighboursInfo::displayID()
-// {
-//     if (id.empty())
-//         cout << "ID list is empty" << endl;
-//     std::list<int>::iterator it;
-//     for (it = id.begin(); it != id.end(); ++it)
-//     {
-//         std::cout << *it;
-//     }
-// }
-// void neighboursInfo::displayDistance()
-// {
-//     if (distance.empty())
-//         cout << "Distance list is empty" << endl;
-//     std::list<int>::iterator it;
-//     for (it = id.begin(); it != id.end(); ++it)
-//     {
-//         std::cout << *it;
-//     }
-// }
 bool cmpListPair(idDistancePair &L, idDistancePair &R)
 {
     return L.getDistance() < R.getDistance();

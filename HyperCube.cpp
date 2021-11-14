@@ -16,25 +16,6 @@
 #include "Helpers.h"
 
 
-string getBinaryString(int num, int bits) {
-    vector<char> digits(bits);
-    for (int i = 0; i < bits; ++i) {
-      digits.push_back(num % 2 + '0');
-      num >>= 1;  
-    }
-    return string(digits.rbegin(), digits.rend());
-}
-
-int hammingDistance(string str1, string str2){
-  int i = 0, count = 0;
-  while (str1[i] != '\0')
-  {
-    if (str1[i] != str2[i])
-      count++;
-    i++;
-  }
-  return count;
-}
 
 HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int probes_arg, double range_arg){
 
@@ -341,12 +322,8 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
 
       if (Mi == M) break;
 
-      bool visit_check = visited.find(vobj->id) != visited.end();
-      if (visit_check) continue;
-
       if (cluster_mode == true && vobj->assigned == true) continue;
 
-      
       //myLogFile <<"id" << vobj->id << endl;
       //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
       range_list.push_back(vobj);
@@ -357,8 +334,6 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
         assigned_total++;
       }
       
-      
-      visited.insert(vobj->id);
 
       Mi++;
     }

@@ -8,6 +8,7 @@
 #include <list>
 #include <vector>
 #include <set>
+
 #include "LSHash.h"
 #include "VectorElement.h"
 #include "Helpers.h"
@@ -15,17 +16,8 @@
 
 using namespace std;
 
-//int LSHash::k_arg = 5;
-//int LSHash::w_arg = 100;
-
-int euclidean_mod(int a, unsigned int b)
-{
-  int r = a % b;
-  return r >= 0 ? r : r + b; //abs(b) doesn't work here
-}
-
-
 int LSHash::hashNumber = 0;
+
 LSHash::LSHash(int b, int v_size, int k_arg, int w_arg)
 {
 
@@ -159,6 +151,7 @@ void LSHash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, in
     Ni++;
   }
 
+  //cout << "Ni " << Ni << endl;
 }
 
 void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //j=no of query
@@ -189,11 +182,7 @@ void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //
     
     VectorElement *vobj = *hitr2;
     if (vobj->distanceCurrQ <= range){
-      bool visit_check = visited.find(vobj->id) != visited.end();
-      if (visit_check) continue;
       
-      //myLogFile <<"id" << vobj->id << endl;
-      //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
       if (cluster_mode == true && vobj->assigned == true) continue;
 
       range_list.push_back(vobj);
@@ -204,12 +193,9 @@ void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //
         assigned_total++;
       }
       
-      visited.insert(vobj->id);
     }
     
   }
-
-
 
 }
 
@@ -225,23 +211,6 @@ void LSHash::insertItem(VectorElement *key, int *r_array)
 void LSHash::displayHash()
 {
 
-  // UNCOMMENT TO DISPLAY V AND T ARRAYS
-  // for (unsigned h = 0; h < 5; h++){
-  //      double* inner_array = array_of_v[h];
-  //      cout << "In array:" << h << endl;
-  //      for (unsigned w = 0; w < 5; w++){
-  //          cout << inner_array[w] << endl;
-  //      }
-  // }
-
-  // for (unsigned h = 0; h < 5; h++){
-
-  //      cout << "In t array:" << this->array_of_t[h] << endl;
-
-  // }
-
-  //myLogFile << "BUCKETS: " << buckets << endl;
-
   for (int i = 0; i < buckets; i++)
   {
     myLogFile << "INDEX: " << i << endl;
@@ -256,20 +225,6 @@ void LSHash::displayHash()
   myLogFile << endl;
 }
 
-// void Hash::displayNeighbours(int query_rows, int N)
-// {
-//   coutLineWithMessage();
-//   for (int i = 0; i < query_rows; i++)
-//   {
-//     for (int j = 0; j < N; j++)
-//     {
-//       cout << "id: " << neighboursInfoTable[i]->arrayId[j] << endl;
-//       cout << "distance: " << neighboursInfoTable[i]->arrayDistance[j] << endl;
-//     }
-//     coutLineWithMessage("query end");
-//   }
-//   coutLineWithMessage();
-// }
 
 void LSHash::displayNeighbours(int N)
 {
@@ -280,18 +235,6 @@ void LSHash::displayNeighbours(int N)
               << "distance is: " << this->neighboursInfoTable[0]->arrayDistance[i] << endl;
   }
 }
-
-// void Hash::DeleteNeighborsInfo(){
-//   cout << query_rows_field << endl;
-//   for (int i = 0; i < query_rows_field; i++)
-//   {
-      
-//    delete[] neighboursInfoTable[i]; //WHAT IS WRONG HERE?
-    
-//   }
-  
-//   delete[] neighboursInfoTable;
-// }
 
 LSHash::~LSHash()
 {
@@ -305,14 +248,21 @@ LSHash::~LSHash()
   delete[] this->array_of_t;
   delete[] table;
 
-  //cout << query_rows_field << endl;
-  //for (int i = 0; i < query_rows_field; i++)
-  //{
-      
-  //  delete[] neighboursInfoTable[i]; WHAT IS WRONG HERE?
+  // cout << query_rows_field << endl;
+
+  //  for (int i = 0; i < N; i++)
+  // {
+  //   cout << "id is: " << this->neighboursInfoTable[0]->arrayId[i] << "  "
+  //             << "distance is: " << this->neighboursInfoTable[0]->arrayDistance[i] << endl;
+  // }
+
+  // for (int i = 0; i < query_rows_field; i++)
+  // {
+  //  cout << i << endl;   
+  //  delete[] neighboursInfoTable[i]; //WHAT IS WRONG HERE?
     
-  //}
+  // }
   
-  //delete[] neighboursInfoTable;
+  // delete[] neighboursInfoTable;
     
 }

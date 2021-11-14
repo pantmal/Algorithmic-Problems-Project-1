@@ -104,11 +104,8 @@ int main(int argc, char *argv[])
             cout << "Please specify output file" << endl;
         exit(0);
     }
-    //I DIDNT CHANGE ANYTHING HERE ONWARDS-----
-
-    // FILE_NAME_INPUT = "input_small_id"; //PARAM <input file>
-    // FILE_NAME_QUERY = "query_small_id"; //PARAM <query file>
-
+    
+    //Setting default parameters.
     if (k_input == -1)
         k_input = 4; //PARAM <k>
     if (NUMBER_OF_HASH_TABLES == -1)
@@ -126,7 +123,7 @@ int main(int argc, char *argv[])
     cout << "NUMBER OF NEIGHBOURS: " << NUMBER_OF_NEIGHBOURS << endl;
     cout << "RANGE: " << RANGE << endl;
 
-    int w_arg = 100;
+    int w_arg = 700;
 
     //set up test logfile
     //ofstream myLogFile;
@@ -404,6 +401,13 @@ int main(int argc, char *argv[])
 
     //---DELETE MEMORY---
 
+    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
+    {
+        delete Hash_Array[i];
+    }
+    delete[] Hash_Array;
+
+
     delete[] r_array;
 
     for (int i = 0; i < how_many_rows; i++)
@@ -417,11 +421,7 @@ int main(int argc, char *argv[])
     }
     delete[] Input_Array;
 
-    for (int i = 0; i < NUMBER_OF_HASH_TABLES; i++)
-    {
-        delete Hash_Array[i];
-    }
-    delete[] Hash_Array;
+    
 
     for (int i = 0; i < query_rows; i++)
     {

@@ -16,9 +16,6 @@
 #include "IdDistancePair.h"
 #include "Helpers.h"
 
-//#define FILE_NAME_INPUT "DataTest.txt"
-//#define FILE_NAME_QUERY "QueryTest.txt"
-
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -207,7 +204,7 @@ int main(int argc, char *argv[])
     //CHECK FOR ONE TABLE
     //Hash h(2500, how_many_columns);
 
-    int w = 100;
+    int w = 700;
     //int d = pow(2,k);
 
     HyperCube Cube_Obj(k, how_many_columns, w, N, M, probes, RANGE);

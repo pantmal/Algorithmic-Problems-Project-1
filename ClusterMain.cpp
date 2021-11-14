@@ -11,15 +11,12 @@
 #include <climits>
 
 //#include "Neighbours.h"
-#include "VectorElement.h"
 //#include "HyperCube.h"
+#include "VectorElement.h"
 #include "Helpers.h"
 #include "Cluster.h"
 #include "KMeans.h"
 
-//#define FILE_NAME_INPUT "DataTest.txt"
-//#define FILE_NAME_QUERY "QueryTest.txt"
-// #define FILE_NAME_INPUT "input_small_id"
 
 using namespace std;
 
@@ -27,7 +24,7 @@ int main(int argc, char *argv[])
 {
     if (argc != 11)
     {
-        cout << "not appropriate number of arguments,programme will terminate " << endl;
+        cout << "Νot appropriate number of arguments, programme will terminate " << endl;
         exit(0);
     }
     string FILE_NAME_INPUT = "NONE";
@@ -209,15 +206,6 @@ int main(int argc, char *argv[])
     cout << "rows==== " << how_many_rows << endl;
 
     //--------DATA COLLECTED----------
-
-    //PARAMS
-    // clusters = 5; //number_of_clusters
-    // kdim = 3;     //number_of_hypercube dimensions
-    // k_input = 3;  //number_of_vector_hash_functions
-    // M = 5000;     //max_number_M_of_hypercube
-    // probes = 5;   //number of probes
-
-    // NUMBER_OF_HASH_TABLES = 5; //number_of_vector_hash_tables
     
     int NUMBER_OF_BUCKETS = how_many_rows / 8;
 
@@ -277,39 +265,34 @@ int main(int argc, char *argv[])
 
     const auto before = clock::now();
 
-    for (int i = 0; i < 4; i++) //4 == ITERANTIONS
-    {
-        if (kmeans_obj.assigner == "Classic")
-        {
+    int iterations = 7;
+
+    for (int i = 0; i < iterations; i++){ //4 == ITERANTIONS
+        
+        if (kmeans_obj.assigner == "Classic"){
             kmeans_obj.ClassicAssignment(Input_Array, how_many_rows);
         }
-        else if (kmeans_obj.assigner == "Hypercube" || kmeans_obj.assigner == "LSH")
-        {
+        else if (kmeans_obj.assigner == "Hypercube" || kmeans_obj.assigner == "LSH"){
             kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
         }
 
         kmeans_obj.update(how_many_columns);
 
-        for (int j = 0; j < how_many_rows; j++)
-        {
+        for (int j = 0; j < how_many_rows; j++){
             Input_Array[j]->assigned = false;
             Input_Array[j]->assigned_clusters.clear();
         }
 
-        if (i != 3)
-        {
-            //cout << "before last" <<endl;
-            for (int k1 = 0; k1 < clusters; k1++)
-            {
+        if (i != (iterations-1)){
+            
+            for (int k1 = 0; k1 < clusters; k1++){
                 kmeans_obj.ClusterArray[k1]->cluster_elements.clear();
             }
 
-            if (kmeans_obj.assigner == "Hypercube")
-            { //This maybe fixes the error at LSH/HC output
+            if (kmeans_obj.assigner == "Hypercube"){ 
                 kmeans_obj.KMeans_Hyper->assigned_total = 0;
             }
-            else if (kmeans_obj.assigner == "LSH")
-            {
+            else if (kmeans_obj.assigner == "LSH"){
                 kmeans_obj.KMeans_Hash_Array[0]->assigned_total = 0;
             }
         }
@@ -317,21 +300,17 @@ int main(int argc, char *argv[])
 
     const sec duration = clock::now() - before;
 
-    if (assigner == "Classic")
-    {
+    if (assigner == "Classic"){
         myLogFile << "Algorithm: Lloyds" << endl;
     }
-    else if (assigner == "HyperCube")
-    {
+    else if (assigner == "Hypercube"){
         myLogFile << "Algorithm: Range Search Hypercube" << endl;
     }
-    else
-    {
+    else{
         myLogFile << "Algorithm: Range Search LSH" << endl;
     }
 
-    for (int k1 = 0; k1 < clusters; k1++)
-    {
+    for (int k1 = 0; k1 < clusters; k1++){
 
         myLogFile << "CLUSTER-" << (k1 + 1) << " {";
         int size = kmeans_obj.ClusterArray[k1]->cluster_elements.size();
@@ -343,32 +322,35 @@ int main(int argc, char *argv[])
 
     double silhouette_total = kmeans_obj.silhouette(how_many_rows);
     myLogFile << "Silhouette: [";
-    for (int k1 = 0; k1 < clusters; k1++)
-    {
+    for (int k1 = 0; k1 < clusters; k1++){
+        
         double get_sil = kmeans_obj.ClusterArray[k1]->silhouette_cluster;
-        if (get_sil == 0)
-        {
+        if (get_sil == -2){
             myLogFile << "Silhouette is undefined, ";
             continue;
         }
+        
         myLogFile << "s" << (k1 + 1) << ": " << get_sil << ", ";
     }
     myLogFile << "stotal: " << silhouette_total << "]" << endl;
 
-    for (int k1 = 0; k1 < clusters; k1++)
-    {
-        myLogFile << "CLUSTER-" << (k1 + 1) << " { centroid: [";
-        kmeans_obj.ClusterArray[k1]->centroid->displayVectorElementArray();
-        myLogFile << "], items: ";
+    if (complete){
+        for (int k1 = 0; k1 < clusters; k1++){
 
-        list<VectorElement *>::iterator hitr1;
-        for (hitr1 = kmeans_obj.ClusterArray[k1]->cluster_elements.begin(); hitr1 != kmeans_obj.ClusterArray[k1]->cluster_elements.end(); ++hitr1)
-        {
-            VectorElement *vobg = *hitr1;
-            myLogFile << vobg->id << ", ";
+            myLogFile << "CLUSTER-" << (k1 + 1) << " { centroid: [";
+            kmeans_obj.ClusterArray[k1]->centroid->displayVectorElementArray();
+            myLogFile << "], items: ";
+
+            list<VectorElement *>::iterator hitr1;
+            for (hitr1 = kmeans_obj.ClusterArray[k1]->cluster_elements.begin(); hitr1 != kmeans_obj.ClusterArray[k1]->cluster_elements.end(); ++hitr1){
+
+                VectorElement *vobg = *hitr1;
+                myLogFile << vobg->id << ", ";
+            }
+            myLogFile << "}" << endl;
         }
-        myLogFile << "}" << endl;
     }
+
     //---DELETE MEMORY---
 
     for (int i = 0; i < how_many_rows; i++)

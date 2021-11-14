@@ -6,6 +6,10 @@
 
 extern std::ofstream myLogFile;
 
+int euclidean_mod(int a, unsigned int b);
+std::string getBinaryString(int num, int bits);
+int hammingDistance(std::string str1, std::string str2);
+int binarySearch(double array[], double target, int size);
 void coutLineWithMessage(std::string m = "");
 void coutLineWithMessage(int, std::string m = "");
 void logFileLineWithMessage(std::string m = "");
@@ -16,13 +20,5 @@ int args_string_to_int(std::string &x);
 double args_string_to_double(std::string &x);
 
 int testL2();
-// class neighboursInfo
-// {
-// public:
-//     std::list<int> id;
-//     std::list<int> distance;
-//     void displayID();
-//     void displayDistance();
-// };
 
 #endif /* HELPERS_H */
