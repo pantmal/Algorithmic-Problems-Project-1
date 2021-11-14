@@ -18,17 +18,22 @@ using namespace std;
 
 int LSHash::hashNumber = 0;
 
+//LSHash constructor
 LSHash::LSHash(int b, int v_size, int k_arg, int w_arg)
 {
 
+  //Get the k and w
   this->k_arg = k_arg;
   this->w_arg = w_arg;
 
-  hashTableNumber = hashNumber;
+  hashTableNumber = hashNumber; //Hash number during creation
   hashNumber++;
+
+  //Creating the LSHash table
   this->buckets = b;
   table = new list<VectorElement *>[buckets];
 
+  //Array of v values so they may be reused easily.
   this->array_of_v = new double *[k_arg];
   for (unsigned k = 0; k < k_arg; k++)
   {
@@ -39,6 +44,7 @@ LSHash::LSHash(int b, int v_size, int k_arg, int w_arg)
   default_random_engine e(seed);
   normal_distribution<double> N(0, 1);
 
+  //Getting values for V with normal dist
   for (unsigned k = 0; k < k_arg; k++)
   {
     double *inner_array = this->array_of_v[k];
@@ -49,6 +55,7 @@ LSHash::LSHash(int b, int v_size, int k_arg, int w_arg)
     }
   }
 
+  //Saving t values too for reuse. With uniform dist
   int open_w = w_arg - 1;
   uniform_real_distribution<> U(0.0, open_w);
   this->array_of_t = new double[k_arg];
@@ -58,18 +65,19 @@ LSHash::LSHash(int b, int v_size, int k_arg, int w_arg)
     this->array_of_t[k] = t;
   }
 
+  //Clustering reverse assignment stuff
   cluster_mode = false;
   current_cluster = 0;
   assigned_total = 0;
 
 }
 
+//Initializing the Neighbours info table for every query.
 void LSHash::initNeighboursInfo(int query_rows, int N)
-{ //N =no of neighbours
+{ 
 
   query_rows_field = query_rows;
   this->neighboursInfoTable = new neighboursInfo*[query_rows];
- 
   
   for (int i = 0; i < query_rows; i++)
   {
@@ -78,19 +86,21 @@ void LSHash::initNeighboursInfo(int query_rows, int N)
   }
 }
 
+//The g function which maps an elem to its bucket
 int LSHash::AmplifiedHashFunction(VectorElement *key, int *r_array)
 {
   
-  int *h_array = new int[k_arg]; //k_arg=5
+  //Get h values
+  int *h_array = new int[k_arg];
   for (int k = 0; k < k_arg; k++)
   {
 
     double *array_start = key->arrayVectorElement;
-    double inner_prod = inner_product(array_start, array_start + (key->size), this->array_of_v[k], 0.0); //~=[-11,11]
-    h_array[k] = floor((inner_prod + array_of_t[k]) / w_arg);                                            //~=2-3
-    //cout << h_array[k]<<endl;
+    double inner_prod = inner_product(array_start, array_start + (key->size), this->array_of_v[k], 0.0); 
+    h_array[k] = floor((inner_prod + array_of_t[k]) / w_arg);                                            
   }
 
+  //Now use the array of r vector and get the mod
   int pre_mod = 0;
   unsigned int M = UINT_MAX - 5;
   for (int i = 0; i < k_arg; i++)
@@ -99,16 +109,19 @@ int LSHash::AmplifiedHashFunction(VectorElement *key, int *r_array)
     pre_mod += euc_mod;
   }
 
-  //cout<<pre_mod<<endl;
+  //And get the index
   unsigned int final_mod = euclidean_mod(pre_mod, M);
-  //cout<<final_mod<<endl;
   unsigned int index = euclidean_mod(final_mod, buckets);
+  
   delete[] h_array;
+
+  //Saving the ID used for the 'query trick'
   key->QueryTrickid[hashTableNumber] = final_mod;
+  
   return index;
 }
 
-
+//Finds N nearest neighbors
 void LSHash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, int N) //j=no of query
 {
   int index = AmplifiedHashFunction(q, r_array);
@@ -120,26 +133,20 @@ void LSHash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, in
   list<VectorElement *>::iterator hitr1;
   list<VectorElement *>::iterator hitr2;
 
-  //sort the lists so that we can get the closest neighbours after
+  //Get the L2 distance of all elements in the bucket with the given query and sort the list based on the distance.
   for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
   {
     VectorElement *vobj = *hitr1;
     vobj->distanceCurrQ = 0.0;
 
-    // cout<< "q id" <<q->QueryTrickid[hashTableNumber] << endl;
-    // cout<< "inp id" <<  vobj->QueryTrickid[hashTableNumber] << endl;
-    // if (q->QueryTrickid[hashTableNumber] == vobj->QueryTrickid[hashTableNumber]){
-    //  cout<< "q id" <<q->QueryTrickid[hashTableNumber] << endl;
-    //  cout<< "inp id" <<  vobj->QueryTrickid[hashTableNumber] << endl;
-    // }
-    //if (q->QueryTrickid[hashTableNumber] == vobj->QueryTrickid[hashTableNumber]) continue;
+    //ID for faster query search is disabled here but you may re-enable if you want.
+    //if (q->QueryTrickid[hashTableNumber] != vobj->QueryTrickid[hashTableNumber]) continue;
 
-    // vobj->setDistanceRandom();
     vobj->getL2Distance(q);
   }
   table[index].sort(cmp);
 
-  
+  //Now start collecting neighbors in the neighboursInfoTable and increment the counter
   int Ni = 0;
   for (hitr2 = table[index].begin(); hitr2 != table[index].end(); ++hitr2)
   {
@@ -151,9 +158,10 @@ void LSHash::calculateDistanceAndFindN(VectorElement *q, int *r_array, int j, in
     Ni++;
   }
 
-  //cout << "Ni " << Ni << endl;
 }
 
+
+//Similar searching for Range
 void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //j=no of query
 {
 
@@ -168,7 +176,6 @@ void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //
 
   set<int> visited;
 
-  //sort the lists so that we can get the closest neighbours after
   for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
   {
     VectorElement *vobj = *hitr1;
@@ -187,7 +194,7 @@ void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //
 
       range_list.push_back(vobj);
       
-      if (cluster_mode == true){
+      if (cluster_mode == true){ //Used in clustering Reverse assignment only
         vobj->assigned = true;
         vobj->assigned_clusters.push_back(current_cluster);
         assigned_total++;
@@ -199,6 +206,7 @@ void LSHash::RangeSearch(VectorElement *q, int *r_array, int j, double range) //
 
 }
 
+//Inserting item using the g func
 void LSHash::insertItem(VectorElement *key, int *r_array)
 {
 
@@ -207,7 +215,7 @@ void LSHash::insertItem(VectorElement *key, int *r_array)
 }
 
 
-// function to display hash table
+//Debug method
 void LSHash::displayHash()
 {
 
@@ -225,7 +233,7 @@ void LSHash::displayHash()
   myLogFile << endl;
 }
 
-
+//Debug method
 void LSHash::displayNeighbours(int N)
 {
   myLogFile << "hash table no: " << this->hashTableNumber << endl;
@@ -236,6 +244,7 @@ void LSHash::displayNeighbours(int N)
   }
 }
 
+//LSHash destructor
 LSHash::~LSHash()
 {
 
@@ -248,21 +257,16 @@ LSHash::~LSHash()
   delete[] this->array_of_t;
   delete[] table;
 
-  // cout << query_rows_field << endl;
 
-  //  for (int i = 0; i < N; i++)
-  // {
-  //   cout << "id is: " << this->neighboursInfoTable[0]->arrayId[i] << "  "
-  //             << "distance is: " << this->neighboursInfoTable[0]->arrayDistance[i] << endl;
-  // }
+  for (int i = 0; i < query_rows_field; i++)
+  {
 
-  // for (int i = 0; i < query_rows_field; i++)
-  // {
-  //  cout << i << endl;   
-  //  delete[] neighboursInfoTable[i]; //WHAT IS WRONG HERE?
-    
-  // }
+     delete[] neighboursInfoTable[i]->arrayId;
+     delete[] neighboursInfoTable[i]->arrayDistance;
+
+   delete neighboursInfoTable[i];
+  }
   
-  // delete[] neighboursInfoTable;
-    
+  delete[] neighboursInfoTable;
+  
 }

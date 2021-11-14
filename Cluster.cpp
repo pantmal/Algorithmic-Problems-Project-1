@@ -6,6 +6,7 @@
 #include "Cluster.h"
 #include "VectorElement.h"
 
+//Cluster constructor sets the centroid field and its id (the counter during its creation).
 Cluster::Cluster(VectorElement* centroid_arg, int id_arg){
 
 

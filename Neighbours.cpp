@@ -2,23 +2,25 @@
 #include <fstream>
 #include <list>
 #include <vector>
+#include <string>
 
 #include "Neighbours.h"
 #include "Helpers.h"
 
+//Constructor and destructor for neighboursInfo class
+
 neighboursInfo::neighboursInfo(int N)
 {
-    this->arrayId = new int[N];
+    this->arrayId = new std::string[N];
     this->arrayDistance = new double[N];
     //std::cout << "constr" <<std::endl;
 }
+
 neighboursInfo::~neighboursInfo()
 {
    
-    // std::cout << "we get here" << std::endl;
-    // delete[] arrayId;
-    // std::cout << "we get here2" << std::endl;
-    // delete[] arrayDistance;
+    //  delete[] arrayId;
+    //  delete[] arrayDistance;
     
 }
 

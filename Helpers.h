@@ -4,7 +4,10 @@
 #include "IdDistancePair.h"
 #include <string>
 
+//Output file is set to extern because it helps when we want to output stuff from many different files.
 extern std::ofstream myLogFile;
+
+//Declaring helper funcs
 
 int euclidean_mod(int a, unsigned int b);
 std::string getBinaryString(int num, int bits);

@@ -1,16 +1,19 @@
 #ifndef IDDISTANCEPAIR_H
 #define IDDISTANCEPAIR_H
 
+#include <string>
+
+//idDistancePair class used during output.
 class idDistancePair
 {
-    int id;
+    std::string id;
     double distance;
 
 public:
-    idDistancePair(int, double);
-    void setId(int);
+    idDistancePair(std::string, double);
+    void setId(std::string);
     void setDistance(int);
-    int getId();
+    std::string getId();
     double getDistance();
     bool operator==(idDistancePair &);
 };

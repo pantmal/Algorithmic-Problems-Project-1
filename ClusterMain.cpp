@@ -22,11 +22,8 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    // if (argc != 11)
-    // {
-    //     cout << "Νot appropriate number of arguments, programme will terminate " << endl;
-    //     exit(0);
-    // }
+    
+    //Setting up the algorithm parameters
     string FILE_NAME_INPUT = "NONE";
     string FILE_CONFIG = "NONE";
     string FILE_NAME_LOG = "NONE";
@@ -37,9 +34,10 @@ int main(int argc, char *argv[])
     int probes = -1;                //number of probes
     int NUMBER_OF_HASH_TABLES = -1; //number_of_vector_hash_tables
     bool complete = false;
-    string assigner = "Classic"; //method
-    for (int i = 1; i < argc; i++)
-    { //skip the name of the file
+    string assigner = "Classic"; //method. Will use Classic for assignment if none provided.
+    
+    for (int i = 1; i < argc; i++){
+
         if (strcmp(argv[i], "-i") == 0)
         {
             FILE_NAME_INPUT = argv[i + 1];
@@ -84,6 +82,8 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    //If no file is provided the program will provide command prompts for the user to enter.
     if (FILE_NAME_INPUT == "NONE" && FILE_CONFIG == "NONE" && FILE_NAME_LOG == "NONE")
     {
         string input;
@@ -97,6 +97,8 @@ int main(int argc, char *argv[])
         cin >> input;
         FILE_NAME_LOG = input;
     }
+
+    //However, the program will exit if the user provides only one file name. Either all file names must be set or none.
     if (FILE_NAME_INPUT == "NONE" || FILE_CONFIG == "NONE" || FILE_NAME_LOG == "NONE")
     {
         cout << "you need to specify all files to execute this programme" << endl;
@@ -120,7 +122,9 @@ int main(int argc, char *argv[])
         perror("Error open");
         exit(EXIT_FAILURE);
     }
-    coutLineWithMessage("checking the config file");
+    //coutLineWithMessage("checking the config file");
+    
+    //Parsing the config file and getting its arguments
     string delimiter = ":";
     while (getline(myConfigFile, line))
     {
@@ -152,6 +156,8 @@ int main(int argc, char *argv[])
             probes = value;
         }
     }
+
+    //Cluster number can't be empty
     if (clusters == -1){
         cout<<"You need to specify clusters value. Programme will exit"<<endl;
         exit(0);
@@ -167,49 +173,51 @@ int main(int argc, char *argv[])
     if (probes == -1)
         probes = 2; //PARAM 
 
-        // cout << "number_of_clusters: " << clusters << endl;
-        // cout << "number_of_vector_hash_tables: " << NUMBER_OF_HASH_TABLES << endl;
-        // cout << "number_of_vector_hash_functions: " << k_input << endl;
-        // cout << "max_number_M_hypercube: " << M << endl;
-        // cout << "number_of_hypercube_dimensions: " << kdim << endl;
-        // cout << "number_of_probes: " << probes << endl;
+    // cout << "number_of_clusters: " << clusters << endl;
+    // cout << "number_of_vector_hash_tables: " << NUMBER_OF_HASH_TABLES << endl;
+    // cout << "number_of_vector_hash_functions: " << k_input << endl;
+    // cout << "max_number_M_hypercube: " << M << endl;
+    // cout << "number_of_hypercube_dimensions: " << kdim << endl;
+    // cout << "number_of_probes: " << probes << endl;
 
-        //set up test logfile
-        //ofstream myLogFile;
-        bool justOnce = true;
-        int how_many_columns = 0;
-        int how_many_rows = 0;
-        int temp;
-        string mystring;
-        string tempString;
+    
+    bool justOnce = true;
+    int how_many_columns = 0;
+    int how_many_rows = 0;
+    int temp;
+    string mystring;
+    string tempString;
 
-        myLogFile.open(FILE_NAME_LOG);
+    myLogFile.open(FILE_NAME_LOG);
 
-        ifstream myfile;
-        //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
-        myfile.open(FILE_NAME_INPUT);
-        how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
-        //how_many_rows++;
-        myfile.close();
-        myfile.clear();
-        myfile.open(FILE_NAME_INPUT);
-        if (myfile.is_open())
+    //Open dataset file to count number of rows.
+    ifstream myfile;
+    myfile.open(FILE_NAME_INPUT);
+    how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
+    //how_many_rows++;
+    myfile.close();
+    myfile.clear();
+    
+    //Now count number of columns
+    myfile.open(FILE_NAME_INPUT);
+    if (myfile.is_open())
+    {
+        while (myfile)
         {
-            while (myfile)
+            getline(myfile, mystring);
+            stringstream sso(mystring);
+            sso >> temp;
+            while (justOnce && sso >> tempString)
             {
-                getline(myfile, mystring);
-                stringstream sso(mystring);
-                sso >> temp;
-                while (justOnce && sso >> tempString)
-                {
-                    how_many_columns++; //calculate the number of columns(dimension of the vector without the id)
-                }
-                justOnce = false;
-                justOnce = false;
+                how_many_columns++; //calculate the number of columns (dimension of the vector without the id)
+            }
+            justOnce = false;
         }
     }
     myfile.close();
     myfile.clear();
+
+    //And now initialize the VectorElement objects.
     myfile.open(FILE_NAME_INPUT);
     VectorElement **Input_Array = new VectorElement *[how_many_rows];
     int i = 0;
@@ -219,8 +227,6 @@ int main(int argc, char *argv[])
         {
             getline(myfile, mystring);
             stringstream sso(mystring);
-            // sso >> temp;
-            //fill the table of vectors with input from file
             if (i < how_many_rows)
             {
                 Input_Array[i] = new VectorElement(how_many_columns, mystring, 0);
@@ -231,19 +237,20 @@ int main(int argc, char *argv[])
     myfile.close();
     myfile.clear();
 
-    cout << "columns==== " << how_many_columns << endl;
-    cout << "rows==== " << how_many_rows << endl;
-
+    //cout << "columns==== " << how_many_columns << endl;
+    //cout << "rows==== " << how_many_rows << endl;
     //--------DATA COLLECTED----------
     
     int NUMBER_OF_BUCKETS = how_many_rows / 8;
 
-    int N = 0;
-    int w = 100;
+    int N = 0; //N is unused. It is set to 0 because it is a HyperCube constructor argument.
+    int w = 100; //Hardcoded value for w.
 
+    //KMeans object is constructed and its centroid are initialized.
     KMeans kmeans_obj(assigner, clusters);
     kmeans_obj.initialization(Input_Array, how_many_rows);
 
+    //Setting up the HyperCube and LSHash objects if need be.
     int *r_array;
     if (kmeans_obj.assigner == "Hypercube")
     {
@@ -294,10 +301,11 @@ int main(int argc, char *argv[])
 
     const auto before = clock::now();
 
+    //Hardcoded value for clustering iterations.
     int iterations = 7;
-
-    for (int i = 0; i < iterations; i++){ //4 == ITERANTIONS
+    for (int i = 0; i < iterations; i++){ 
         
+        //Assignment step
         if (kmeans_obj.assigner == "Classic"){
             kmeans_obj.ClassicAssignment(Input_Array, how_many_rows);
         }
@@ -305,13 +313,14 @@ int main(int argc, char *argv[])
             kmeans_obj.ReverseAssignment(Input_Array, how_many_rows);
         }
 
+        //Update step
         kmeans_obj.update(how_many_columns);
 
+        //Clearing up some valus for the next pass.
         for (int j = 0; j < how_many_rows; j++){
             Input_Array[j]->assigned = false;
             Input_Array[j]->assigned_clusters.clear();
         }
-
         if (i != (iterations-1)){
             
             for (int k1 = 0; k1 < clusters; k1++){
@@ -327,8 +336,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    const sec duration = clock::now() - before;
+    const sec duration = clock::now() - before; //Getting clustering time
 
+    //Now moving on to output.
     if (assigner == "Classic"){
         myLogFile << "Algorithm: Lloyds" << endl;
     }
@@ -349,6 +359,7 @@ int main(int argc, char *argv[])
     }
     myLogFile << "clustering_time: " << duration.count() << "[s]" << endl;
 
+    //Getting silhouette scores for every cluster and a total one.
     double silhouette_total = kmeans_obj.silhouette(how_many_rows);
     myLogFile << "Silhouette: [";
     for (int k1 = 0; k1 < clusters; k1++){
@@ -363,6 +374,7 @@ int main(int argc, char *argv[])
     }
     myLogFile << "stotal: " << silhouette_total << "]" << endl;
 
+    //Print all ids, if complete parameter is set.
     if (complete){
         for (int k1 = 0; k1 < clusters; k1++){
 

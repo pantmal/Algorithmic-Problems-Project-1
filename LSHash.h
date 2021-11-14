@@ -12,15 +12,14 @@
 
 using namespace std;
 
+//LSHash class
 class LSHash
 {
 public:
     static int hashNumber;
     int hashTableNumber;
-    // static int* r_array;
-    int buckets; // No. of buckets
+    int buckets; 
 
-    // Pointer to an array containing buckets
     list<VectorElement *> *table;
     neighboursInfo **neighboursInfoTable;
     double **array_of_v;
@@ -28,7 +27,7 @@ public:
     int query_rows_field;
 
     int k_arg;
-    int w_arg; //may bring back static
+    int w_arg;
 
 
     bool cluster_mode;
@@ -39,14 +38,7 @@ public:
     int temp;
 
 public:
-    // static void set_k_arg(int temp)
-    // {
-    //     k_arg = temp;
-    // }
-    // static int get_k_arg()
-    // {
-    //     return k_arg;
-    // }
+ 
     void calculateDistanceAndFindN(VectorElement *, int *r_array, int j, int N);
     void displayNeighbours(int);
     void RangeSearch(VectorElement*, int*, int, double);
@@ -58,8 +50,6 @@ public:
     void DeleteNeighborsInfo();
 
     void insertItem(VectorElement *x, int *r_array);
-
-    //void deleteItem(VectorElement* key);
     static bool cmp(VectorElement *L, VectorElement *R)
     {
         return L->distanceCurrQ < R->distanceCurrQ;

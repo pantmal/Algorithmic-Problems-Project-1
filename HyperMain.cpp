@@ -21,6 +21,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     
+    //Setting up the algorithm parameters
     string FILE_NAME_INPUT = "NONE";
     string FILE_NAME_QUERY = "NONE";
     string FILE_NAME_LOG = "NONE";
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
    
     
     for (int i = 1; i < argc; i++)
-    { //skip the name of the file
+    { 
         if (strcmp(argv[i], "-i") == 0)
         {
             FILE_NAME_INPUT = argv[i + 1];
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    //If no file is provided the program will provide command prompts for the user to enter.
     if (FILE_NAME_INPUT == "NONE" && FILE_NAME_QUERY == "NONE" && FILE_NAME_LOG == "NONE")
     {
         string input;
@@ -91,6 +93,7 @@ int main(int argc, char *argv[])
         FILE_NAME_LOG = input;
     }
 
+    //However, the program will exit if the user provides only one file name. Either all file names must be set or none.
     if (FILE_NAME_INPUT == "NONE" || FILE_NAME_QUERY == "NONE" || FILE_NAME_LOG == "NONE")
     {
         cout << "Not enough files specified: " << endl;
@@ -102,6 +105,8 @@ int main(int argc, char *argv[])
             cout << "Please specify output file" << endl;
         exit(0);
     }
+
+    //Default values
     if (k == -1)
         k = 14; //PARAM <k>
     if (M == -1)
@@ -113,20 +118,16 @@ int main(int argc, char *argv[])
     if (RANGE == -1)
         RANGE = 10000; //PARAM <radius>
 
-    cout << "FILE_NAME_INPUT: " << FILE_NAME_INPUT << endl;
-    cout << "FILE_NAME_QUERY: " << FILE_NAME_QUERY << endl;
-    cout << "FILE_NAME_LOG: " << FILE_NAME_LOG << endl;
-    cout << "k: " << k << endl;
-    cout << "M: " << M << endl;
-    cout << "probes: " << probes << endl;
-    cout << "N: " << N << endl;
-    cout << "RANGE: " << RANGE << endl;
-    // return 0;
-    // string FILE_NAME_INPUT = "input_small_id"; //PARAM <input file>
-    // string FILE_NAME_QUERY = "query_small_id"; //PARAM <query file>
+    // cout << "FILE_NAME_INPUT: " << FILE_NAME_INPUT << endl;
+    // cout << "FILE_NAME_QUERY: " << FILE_NAME_QUERY << endl;
+    // cout << "FILE_NAME_LOG: " << FILE_NAME_LOG << endl;
+    // cout << "k: " << k << endl;
+    // cout << "M: " << M << endl;
+    // cout << "probes: " << probes << endl;
+    // cout << "N: " << N << endl;
+    // cout << "RANGE: " << RANGE << endl;
+    
 
-    //set up test logfile
-    //ofstream myLogFile;
     bool justOnce = true;
     int how_many_columns = 0;
     int how_many_rows = 0;
@@ -136,13 +137,15 @@ int main(int argc, char *argv[])
 
     myLogFile.open(FILE_NAME_LOG); //PARAM <output file>
 
+    //Open dataset file to count number of rows.
     ifstream myfile;
-    //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
     myfile.open(FILE_NAME_INPUT);
     how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
     //how_many_rows++;
     myfile.close();
     myfile.clear();
+
+    //Now count number of columns
     myfile.open(FILE_NAME_INPUT);
     if (myfile.is_open())
     {
@@ -153,7 +156,7 @@ int main(int argc, char *argv[])
             sso >> temp;
             while (justOnce && sso >> tempString)
             {
-                how_many_columns++; //calculate the number of columns(dimension of the vector without the id)
+                how_many_columns++; //calculate the number of columns (dimension of the vector without the id)
             }
             justOnce = false;
         }
@@ -165,6 +168,8 @@ int main(int argc, char *argv[])
     }
     myfile.close();
     myfile.clear();
+
+    //And now initialize the VectorElement objects.
     myfile.open(FILE_NAME_INPUT);
     VectorElement **Input_Array = new VectorElement *[how_many_rows];
     int i = 0;
@@ -174,8 +179,6 @@ int main(int argc, char *argv[])
         {
             getline(myfile, mystring);
             stringstream sso(mystring);
-            // sso >> temp;
-            //fill the table of vectors with input from file
             if (i < how_many_rows)
             {
                 Input_Array[i] = new VectorElement(how_many_columns, mystring, 0);
@@ -191,33 +194,27 @@ int main(int argc, char *argv[])
     myfile.close();
     myfile.clear();
 
-    cout << "columns==== " << how_many_columns << endl;
-    cout << "rows==== " << how_many_rows << endl;
-
+    // cout << "columns==== " << how_many_columns << endl;
+    // cout << "rows==== " << how_many_rows << endl;
     //--------DATA COLLECTED----------
 
-    //CHECK FOR ONE TABLE
-    //Hash h(2500, how_many_columns);
 
-    int w = 700;
-    //int d = pow(2,k);
+    int w = 700; //Hardcoded value for w
 
+    //Initialize cube object and insert items
     HyperCube Cube_Obj(k, how_many_columns, w, N, M, probes, RANGE);
-
     for (int j = 0; j < how_many_rows; j++)
     {
         Cube_Obj.insertItem(Input_Array[j]);
     }
 
-    //Cube_Obj.displayCube();
-
-    //COLUMNS?????? epanaipologismo????
-    // //OPEN QUERY FILE AND PARSE EACH LINE
+    
+    //Save the query items.
     ifstream myfilequery;
     myfilequery.open(FILE_NAME_QUERY);
     int query_rows = count(istreambuf_iterator<char>(myfilequery), istreambuf_iterator<char>(), '\n');
     //how_many_rows++;
-    cout << "Query rows are: " << query_rows << endl;
+    //cout << "Query rows are: " << query_rows << endl;
     myfilequery.close();
     myfilequery.clear();
     myfilequery.open(FILE_NAME_QUERY);
@@ -230,7 +227,6 @@ int main(int argc, char *argv[])
         {
             getline(myfilequery, mystring);
             stringstream sso(mystring);
-            // sso >> temp;
             if (query_i < query_rows)
             {
                 Query_Array[query_i] = new VectorElement(how_many_columns, mystring, 0);
@@ -245,12 +241,15 @@ int main(int argc, char *argv[])
     }
     myfilequery.close();
 
+    //Initialize the arrays for queries.
     Cube_Obj.initNeighboursInfo(query_rows);
 
+    //And now for each query...
     for (int i = 0; i < query_rows; i++)
     {
         myLogFile << "Query: " << Query_Array[i]->id << endl;
 
+        //First get the actual N neighbors with brute force check
         list<idDistancePair> PairListBF;
         std::chrono::steady_clock::time_point begin_bf = std::chrono::steady_clock::now();
 
@@ -258,7 +257,7 @@ int main(int argc, char *argv[])
         using sec = std::chrono::duration<double>;
 
         const auto before_BF = clock::now();
-        for (int l = 0; l < how_many_rows; l++) //for each hash table
+        for (int l = 0; l < how_many_rows; l++)
         {
             Input_Array[l]->getL2Distance(Query_Array[i]);
             idDistancePair *Pair = new idDistancePair(Input_Array[l]->id, Input_Array[l]->distanceCurrQ);
@@ -267,54 +266,37 @@ int main(int argc, char *argv[])
         }
         PairListBF.sort(cmpListPair);
         const sec duration_BF = clock::now() - before_BF;
-        // list<idDistancePair>::iterator hitrbf;
-        // int currNeighboursbf = 0;
-        // for (hitrbf = PairListBF.begin(); hitrbf != PairListBF.end(); ++hitrbf)
-        // {
-        //     if (currNeighboursbf == N) break;
-        //     // idDistancePair vobj = hitr1;
-        //     myLogFile << "Real Neighbour id: " << hitrbf->getId() << endl;
-        //     myLogFile << "Real Neighbour distance: " << hitrbf->getDistance() << endl;
-        //     currNeighboursbf++;
-        // }
+        
 
-        //cout << "got" << endl;
+        //Now find the approx N neighbors with Hypercube
         const auto before_NN = clock::now();
-        Cube_Obj.getFirstProbe(Query_Array[i], i, "NN");
-        //cout << "got2" << endl;
-        //
+        Cube_Obj.getFirstProbe(Query_Array[i], i, "NN"); //The algorithm will start with getFirstProbe func and proceed.
+
         list<idDistancePair> PairList;
-
-        int actual_N = Cube_Obj.Ni;
-        // if (Cube_Obj.probes_counter == probes){
-        //     actual_N = Cube_Obj.Ni;
-        // }else if (Cube_Obj.Mi == M){
-        //     actual_N = M;
-        // }
-
+        int actual_N = Cube_Obj.Ni; //Actual N is the last value of Ni. Because search may stop from the 'M' or 'probes' arguments.
         for (int Ni = 0; Ni < actual_N; Ni++)
-        {
-            //cout << "id is: " << Cube_Obj.neighboursInfoTable[i]->arrayId[Ni]  << endl;
-            //cout << "dist is: " << Cube_Obj.neighboursInfoTable[i]->arrayDistance[Ni]  << endl;
+        { //Add a idDistancePair object for every neighbor.
+
             idDistancePair *Pair = new idDistancePair(Cube_Obj.neighboursInfoTable[i]->arrayId[Ni], Cube_Obj.neighboursInfoTable[i]->arrayDistance[Ni]);
-            if (Pair->getDistance() == -1 || Pair->getDistance() == 0)
-                break; //for sure?
+            if (Pair->getDistance() == -1 || Pair->getDistance() == 0) break;
+            
             PairList.push_back(*Pair);
             delete Pair;
         }
-        PairList.sort(cmpListPair);
+        PairList.sort(cmpListPair); //sort the list to get nearest values first.
         const sec duration_NN = clock::now() - before_NN;
 
+        
+        //coutLineWithMessage("NEAREST NEIGHBOURS ARE: ");
+        
+        //Output of NN search.
         int currNeighbours = 0;
-        coutLineWithMessage("NEAREST NEIGHBOURS ARE: ");
-
         list<idDistancePair>::iterator hitr1 = PairList.begin();
         list<idDistancePair>::iterator hitrbf2 = PairListBF.begin();
         for (; hitr1 != PairList.end() && hitrbf2 != PairListBF.end(); ++hitr1, ++hitrbf2)
         {
-            if (currNeighbours == N)
-                break;
-            // idDistancePair vobj = hitr1;
+            if (currNeighbours == N) break;
+            
             myLogFile << "Nearest neighbor-" << (currNeighbours + 1) << ": " << hitr1->getId() << endl;
             myLogFile << "distanceHypercube: " << hitr1->getDistance() << endl;
             myLogFile << "distanceTrue: " << hitrbf2->getDistance() << endl;
@@ -325,6 +307,7 @@ int main(int argc, char *argv[])
         myLogFile << "tHypercube = " << duration_NN.count() << "[s]" << endl;
         myLogFile << "tTrue = " << duration_BF.count() << "[s]" << endl;
 
+        //Now doing Range search
         myLogFile << "R-near neighbors: " << endl;
 
         list<VectorElement *> cube_range_list;
@@ -332,24 +315,20 @@ int main(int argc, char *argv[])
         Cube_Obj.range = RANGE;
 
         Cube_Obj.getFirstProbe(Query_Array[i], i, "range");
-
         cube_range_list = Cube_Obj.range_list;
+
+        //Output for range search.
         list<VectorElement *>::iterator hitrR;
         for (hitrR = cube_range_list.begin(); hitrR != cube_range_list.end(); ++hitrR)
         {
             VectorElement *vobj = *hitrR;
             myLogFile << vobj->id << endl;
-            //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
         }
     }
 
     //---DELETE MEMORY---
 
-    // for (int i = 0; i < how_many_rows; i++)
-    // {
-    //     Input_Array[i]->displayId();
-    // }
-    //cout << "del" << endl;
+    
     for (int i = 0; i < how_many_rows; i++)
     {
         delete Input_Array[i];

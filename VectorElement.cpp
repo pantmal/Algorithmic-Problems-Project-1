@@ -7,11 +7,13 @@ using namespace std;
 
 //std::ofstream myLogFile;
 
+//Debug method
 void VectorElement::displayId()
 {
     // myLogFile << "id is: " << id << std::endl;
 }
 
+//Displaying each column/value of the vector
 void VectorElement::displayVectorElementArray()
 {
     // myLogFile << "---ELEMENT ARRAY---" << std::endl;
@@ -26,9 +28,9 @@ VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfH
 
     assigned = false;
 
-    QueryTrickid = new unsigned int[numberOfHashTables]; //gets set when the vector element gets into a bucket
+    QueryTrickid = new unsigned int[numberOfHashTables]; //gets set when the vector element gets into an LSH bucket
     
-    id = 0;
+    id = "0";
     double temp;
     int counter = 0;
     distanceCurrQ = 0;
@@ -37,22 +39,21 @@ VectorElement::VectorElement(int dimensions, std::string fileLine, int numberOfH
     arrayVectorElement = new double[size];
     
     std::stringstream sso(fileLine);
-    sso >> id;
-    while (sso >> temp)
+    sso >> id; //Get the id
+    while (sso >> temp) //And the vector values in the array field
     {
-        //pass in the arrayvectorelement the appropriate values
-        // std::cout << "CONSTRUCTOR VALUES---:" << id << std::endl;
-        // sso >> arrayVectorElement[counter];
         arrayVectorElement[counter] = temp;
         counter++;
     }
 }
 
+//Debug method
 void VectorElement::displayDistanceCurrQ()
 {
     cout << distanceCurrQ << endl;
 }
 
+//Debug method
 void VectorElement::setDistanceRandom()
 {
     unsigned long x;
@@ -63,6 +64,7 @@ void VectorElement::setDistanceRandom()
     distanceCurrQ = x + 1;
 }
 
+//Getting the L2 distance with the q/argument specified and setting it to the field.
 void VectorElement::getL2Distance(VectorElement *q)
 {
     double temp;
@@ -78,6 +80,7 @@ void VectorElement::getL2Distance(VectorElement *q)
     this->distanceCurrQ = sqrt(distance);
 }
 
+//Destructor
 VectorElement::~VectorElement()
 {
 

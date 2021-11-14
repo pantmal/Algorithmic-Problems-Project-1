@@ -8,13 +8,13 @@
 #include <sstream>
 using namespace std;
 
-
+//euclidean_mod used for LSH amplified hash function.
 int euclidean_mod(int a, unsigned int b){
   int r = a % b;
   return r >= 0 ? r : r + b; 
 }
 
-
+//Setting a number to a binary string representation. Needed for Hypercube.
 string getBinaryString(int num, int bits) {
     vector<char> digits(bits);
     for (int i = 0; i < bits; ++i) {
@@ -24,6 +24,7 @@ string getBinaryString(int num, int bits) {
     return string(digits.rbegin(), digits.rend());
 }
 
+//Hamming distance on string vars.
 int hammingDistance(string str1, string str2){
   int i = 0, count = 0;
   while (str1[i] != '\0')
@@ -35,6 +36,7 @@ int hammingDistance(string str1, string str2){
   return count;
 }
 
+//Binary search to find x in KMeans initialization.
 int binarySearch(double array[], double target, int size){
     
     if (target <= array[0]) return 0;
@@ -68,7 +70,7 @@ int binarySearch(double array[], double target, int size){
     return mid;
 }
 
-
+//The rest are debug stuff.
 int testL2()
 {
     unsigned long x;
@@ -78,14 +80,17 @@ int testL2()
     x %= 10000001;
     return x;
 }
+
 void coutLineWithMessage(std::string m)
 {
     std::cout << "------" << m << "------" << std::endl;
 }
+
 void coutLineWithMessage(int k, std::string m)
 {
     std::cout << "------" << m + " " << k << "------" << std::endl;
 }
+
 void logFileLineWithMessage(std::string m)
 {
     myLogFile << "------" << m << "------" << std::endl;
@@ -95,10 +100,12 @@ bool cmpListPair(idDistancePair &L, idDistancePair &R)
 {
     return L.getDistance() < R.getDistance();
 }
+
 bool cmpListPairR(idDistancePair &L, idDistancePair &R)
 {
     return L.getId() < R.getId();
 }
+
 int string_into_int(std::string &s)
 {
     stringstream sso(s);
@@ -106,6 +113,7 @@ int string_into_int(std::string &s)
     sso >> x;
     return x;
 }
+
 int args_string_to_int(std::string &x)
 {
     int num;
@@ -113,6 +121,7 @@ int args_string_to_int(std::string &x)
     num = string_into_int(x);
     return num;
 }
+
 double args_string_to_double(std::string &x)
 {
     double num;

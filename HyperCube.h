@@ -14,20 +14,18 @@
 
 using namespace std;
 
+//Hypercube class
 class HyperCube
 {
-    // static int* r_array;
-    int buckets; // No. of buckets
+    int buckets; 
     int k_cube;
     int w_cube;
 
-    // Pointer to an array containing buckets
     list<VectorElement * > *table;
     double **array_of_v;
     double *array_of_t;
     TableF **TableOfValuesF;
 
-    //neighboursInfo **neighboursInfoTable;
     int hammingCounter;
     list<int> probesCandidates;
     set<int> visited;
@@ -53,7 +51,6 @@ public:
     neighboursInfo **neighboursInfoTable;
 
     list<VectorElement * > range_list;
-
 
     HyperCube(int, int, int, int, int, int, double);
     void initNeighboursInfo(int);

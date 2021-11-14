@@ -4,6 +4,7 @@
 
 #include "TableF.h"
 
+//TableF has two buckets, one for the values that got 0 and the ones that got 1
 TableF::TableF(){
 
   this->buckets = 2;
@@ -11,6 +12,7 @@ TableF::TableF(){
     
 }
 
+//Check if the item is already in the table return its pos (meaning its bucket (meaning 0 or 1))
 int TableF::checkItem(int item){
 
     int pos = -1;
@@ -19,7 +21,6 @@ int TableF::checkItem(int item){
         
         for (hitr1= table[i].begin();hitr1 != table[i].end(); hitr1++) {
             if (*hitr1 == item){
-                //cout << item << "+" << i <<endl;
                 pos = i;
                 break;
             }
@@ -29,12 +30,14 @@ int TableF::checkItem(int item){
     return pos;
 }
 
+//Add item
 void TableF::insertItem(int item, int pos){
 
     table[pos].push_back(item);
 
 }
 
+//Debug method
 void TableF::displayHash(){
     for (int i = 0; i < buckets; i++){
     cout << "INDEX: " << i << endl;
@@ -46,6 +49,7 @@ void TableF::displayHash(){
 
 }
 
+//Destructor
 TableF::~TableF(){
 
     delete[] table;

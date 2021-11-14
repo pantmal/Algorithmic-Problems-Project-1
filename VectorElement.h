@@ -8,10 +8,11 @@
 #include <fstream>
 #include <list>
 
+//VectorElement class
 class VectorElement
 {
 public:
-    int id; //name/id of the element
+    std::string id; //name/id of the element
     int size;
     double *arrayVectorElement;
     double distanceCurrQ;

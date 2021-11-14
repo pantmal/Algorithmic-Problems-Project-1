@@ -16,9 +16,10 @@
 #include "Helpers.h"
 
 
-
+//Hypercube constructor
 HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int probes_arg, double range_arg){
 
+  //Every 'i' var is the counter of its respective number (i.e. Ni is counter for N neighbors)
   N = N_arg;
   Ni = 0;
 
@@ -35,10 +36,12 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
   w_cube = w_arg;
   k_cube = k_arg;
 
+  //Creating the HyperCube table
   int dims = pow(2,k_arg);
   this->buckets = dims;
   table = new list<VectorElement* >[buckets];
 
+  //Array of v values so they may be reused easily.
   this->array_of_v = new double *[k_arg];
   for (unsigned k = 0; k < k_arg; k++)
   {
@@ -48,7 +51,8 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
   unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
   default_random_engine e(seed);
   normal_distribution<double> N(0, 1);
-
+  
+  //Getting values for V with normal dist
   for (unsigned k = 0; k < k_arg; k++)
   {
     double *inner_array = this->array_of_v[k];
@@ -59,6 +63,7 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
     }
   }
 
+  //Saving t values too for reuse. With uniform dist
   int open_w = w_arg - 1;
   uniform_real_distribution<> U(0.0, open_w);
   this->array_of_t = new double[k_arg];
@@ -68,34 +73,33 @@ HyperCube::HyperCube(int k_arg, int v_size, int w_arg, int N_arg, int M_arg, int
     this->array_of_t[k] = t;
   }
 
-
+  //And setting the TableF objects which will save the 0/1 values of all f functions.
   TableOfValuesF = new TableF *[k_arg];
   for (int i = 0; i < k_arg; i++){
     TableOfValuesF[i] = new TableF();
-   }
+  }
 
+  //Clustering reverse assignment stuff
   cluster_mode = false;
   current_cluster = 0;
   assigned_total = 0;
 }
 
+//Initializing the Neighbours info table for every query.
 void HyperCube::initNeighboursInfo(int query_rows)
-{ //N =no of neighbours
+{ 
 
-  
   this->neighboursInfoTable = new neighboursInfo*[query_rows];
   
 
   for (int i = 0; i < query_rows; i++)
   {
-    
-    this->neighboursInfoTable[i] = new neighboursInfo(N);
-    
+    this->neighboursInfoTable[i] = new neighboursInfo(N); 
   }
 
 }
 
-
+//Function f will check its TableF to see if the result of h is already set to 0 or 1 and will return the right bit. Otherwise it creates a new value with uniform dist.
 int HyperCube::functionF(int h, int i){
 
     unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
@@ -116,6 +120,7 @@ int HyperCube::functionF(int h, int i){
 
 }
 
+//Returns the index for the VectorElement provided.
 int HyperCube::indexBuilder(VectorElement *key){
 
     string index_s = "";
@@ -128,7 +133,6 @@ int HyperCube::indexBuilder(VectorElement *key){
     }
 
     for (int i = 0; i < k_arg; i++){
-        //cout << h_array[i] << endl;
         int bit = functionF(h_array[i], i);
         string bit_s = to_string(bit);    
         index_s += bit_s;
@@ -144,7 +148,7 @@ int HyperCube::indexBuilder(VectorElement *key){
 
 }
 
-
+//Inserts an item to the HyperCube
 void HyperCube::insertItem(VectorElement *key){
 
     int index = indexBuilder(key);
@@ -152,6 +156,7 @@ void HyperCube::insertItem(VectorElement *key){
 
 }
 
+//Used for the query searching. It will get the index value it belongs to and will start searching.
 void HyperCube::getFirstProbe(VectorElement *key, int j, string search){
 
   probesCandidates.clear();
@@ -174,38 +179,36 @@ void HyperCube::getFirstProbe(VectorElement *key, int j, string search){
 
 }
 
-
+//Gets next probe using hamming dist
 void HyperCube::getNextProbe(VectorElement *key, int j, int index, string search){
 
+  //If probesCandidates list is empty we will get new hamming dist nearest probes. 
   if (probesCandidates.empty()){
 
-    hammingCounter++;
+    hammingCounter++; //Add the counter every time you update the list. First time, it will have probes of hamming dist 1, next time hamming dist 2 etc
 
     for (int bucket = 0; bucket < buckets; bucket++){
       if (index == bucket) continue;
 
       if (!visited.empty()){
-        bool visit_check = visited.find(bucket) != visited.end();
-        if (visit_check){
-          //cout << "yup..." << endl;
-          continue;
-        }
-          
+        bool visit_check = visited.find(bucket) != visited.end(); //Skip hamming dist nearest probes if already calculated.
+        if (visit_check) continue;
+        
       }
       
-
+      //Getting string format of the bucket nums
       string index_s = getBinaryString(index, k_cube);
       string bucket_s = getBinaryString(bucket, k_cube);
 
       int dist = hammingDistance(index_s, bucket_s);
 
-      //visited.insert(bucket);
-
+      //Add the candidate if the distance is on the right track.
       if (dist == hammingCounter){
         probesCandidates.push_back(bucket);
       }      
     }
 
+    //Remember the visited probes
     for (list<int>::iterator i=probesCandidates.begin(); i!=probesCandidates.end(); i++)
     {
       int item = *i;
@@ -214,20 +217,19 @@ void HyperCube::getNextProbe(VectorElement *key, int j, int index, string search
 
   }
 
+  //Now pick a random probe from the list using uniform dist
   unsigned seed = chrono::steady_clock::now().time_since_epoch().count();
   default_random_engine e(seed);
   uniform_int_distribution<> U(0,probesCandidates.size()-1);
-  //cout << "size " << probesCandidates.size() << endl;
   int random_element = U(e);
       
+  //Find the item in the list and remove it. We only check each probe once.
   list<int>::iterator it = probesCandidates.begin();
   advance(it,random_element);
   int item = *it;
-  //cout << item << endl;
   probesCandidates.erase(it);
 
-  //cout << item << endl;
-
+  //Make the next search on the item(bucket) you picked.
   if (search == "NN"){
     calculateDistanceAndFindN(key,j,item);
   }
@@ -238,9 +240,10 @@ void HyperCube::getNextProbe(VectorElement *key, int j, int index, string search
 
 }
 
+//Finds N nearest neighbors
 void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
 
-  //int index = indexBuilder(key);
+
   if (table[index].size() == 0){
     return;
   }
@@ -248,15 +251,15 @@ void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
   list<VectorElement *>::iterator hitr1;
   list<VectorElement *>::iterator hitr2;
 
+  //Get the L2 distance of all elements in the bucket with the given query and sort the list based on the distance.
   for (hitr1 = table[index].begin(); hitr1 != table[index].end(); ++hitr1)
   {
     VectorElement *vobj = *hitr1;
     vobj->getL2Distance(q);
-    //cout << "init dist:" << vobj->distanceCurrQ << endl;
   }
   table[index].sort(cmp);
 
-  
+  //Now start collecting neighbors in the neighboursInfoTable and increment the counters
   for (hitr2 = table[index].begin(); hitr2 != table[index].end(); hitr2++)
   {
 
@@ -281,11 +284,10 @@ void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
 
   probes_counter++;
 
+  //First check if N is reached, next check for M argument and finally for probes. Also make sure that you won't exceed bucket size.
   if ( Ni < N){
     if (Mi != M){
       if (probes_counter != probes && probes_counter != buckets){
-        // cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
-        // cout << "index " << index << endl;
         getNextProbe(q,j,init_index,"NN");
       }
     }
@@ -294,7 +296,8 @@ void HyperCube::calculateDistanceAndFindN(VectorElement *q, int j, int index){
 
 }
 
-void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
+//Similar searching for Range
+void HyperCube::RangeSearch(VectorElement *q, int j, int index)
 {
 
   if (table[index].size() == 0){
@@ -324,17 +327,15 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
 
       if (cluster_mode == true && vobj->assigned == true) continue;
 
-      //myLogFile <<"id" << vobj->id << endl;
-      //myLogFile <<"dist" << vobj->distanceCurrQ << endl;
+      
       range_list.push_back(vobj);
       
-      if (cluster_mode == true){
+      if (cluster_mode == true){ //Used in clustering Reverse assignment only
         vobj->assigned = true;
         vobj->assigned_clusters.push_back(current_cluster);
         assigned_total++;
       }
       
-
       Mi++;
     }
     
@@ -342,20 +343,17 @@ void HyperCube::RangeSearch(VectorElement *q, int j, int index) //j=no of query
 
   probes_counter++;
 
-  
+
   if (Mi != M){
     if (probes_counter != probes && probes_counter != buckets){
-      // cout << "got2 " << Ni << " " << Mi << " " << probes_counter <<endl;  
-      // cout << "index " << index << endl;
       getNextProbe(q,j,init_index,"range");
     }
   }
   
 
-
 }
 
-
+//Debug method
 void HyperCube::displayCube(){
     for (int i = 0; i < buckets; i++){
     cout << "INDEX: " << i << endl;
@@ -365,13 +363,9 @@ void HyperCube::displayCube(){
       x->displayVectorElementArray();
     }
   }
-
-  //for (int i = 0; i < 3; i++){
-  //  TableOfValuesF[i]->displayHash();
-  //}
-
 }
 
+//HyperCube destructor
 HyperCube::~HyperCube(){
 
     
@@ -391,10 +385,3 @@ HyperCube::~HyperCube(){
   delete[] table;
 }
 
-//f
-
-//indexBuilder
-
-//insert
-
-//des

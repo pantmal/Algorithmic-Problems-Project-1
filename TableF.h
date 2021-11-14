@@ -12,17 +12,13 @@
 
 using namespace std;
 
+//TableF class
 class TableF
 {
-    // static int* r_array;
-    int buckets; // No. of buckets
 
-    // Pointer to an array containing buckets
-    list<int > *table;
-    
+    int buckets; 
+    list<int > *table;    
     int temp;
-
-
 
 public:
     TableF();
