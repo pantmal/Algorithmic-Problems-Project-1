@@ -70,7 +70,7 @@ void KMeans::initialization(VectorElement** Input_Array, int input_size){
                 VectorElement *vobj = Input_Array[i];
                 vobj->getL2Distance(ClusterArray[k]->centroid);
 
-                if (vobj->distanceCurrQ > max_dist){
+                if (vobj->distanceCurrQ > min_dist){
                     min_dist = vobj->distanceCurrQ;
                 } 
             }

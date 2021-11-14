@@ -345,5 +345,7 @@ int main(int argc, char *argv[])
 
     myLogFile.close();
 
+
+    cout << "Program has successfully completed and written its results to the output file." << endl;
     return 0;
 }
