@@ -1,6 +1,0 @@
-TODO
-1)euclidean_mod(does it work this way???) + add it to helpers
-2)set up gitignore
-3)functions galore(clear close open files)
-//TODO: Find out the shit with rows
-//TODO: find out why there is an extra loop (line 68, main)

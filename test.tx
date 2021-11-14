@@ -1,8 +1,0 @@
-Algorithm: Lloyds
-CLUSTER-1 {size: 16, centroid: [444.2, 1728.73, 6079.27, 2160.67, 340.6, ]
-CLUSTER-2 {size: 1, centroid: [93545, 39880, 74319, 97559, 74724, ]
-CLUSTER-3 {size: 4, centroid: [74123.3, 84586.2, 44356.6, 82761, 9731.94, ]
-CLUSTER-4 {size: 5, centroid: [47716.4, 63310, 28264, 33398.7, 62898.2, ]
-CLUSTER-5 {size: 4, centroid: [17159.4, 66355.3, 94201.9, 86165.1, 68158.4, ]
-clustering_time: 0.000552217[s]
-Silhouette: [s1: 0.892708, Silhouette is undefined, s3: 0.515098, s4: 0.363285, s5: 0.644738, stotal: 0.724636]
