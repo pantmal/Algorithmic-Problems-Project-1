@@ -20,11 +20,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 7 && argc != 1)
-    {
-        cout << "not appropriate number of arguments,programme will terminate " << endl;
-        exit(0);
-    }
+    
     string FILE_NAME_INPUT = "NONE";
     string FILE_NAME_QUERY = "NONE";
     string FILE_NAME_LOG = "NONE";
@@ -33,24 +29,8 @@ int main(int argc, char *argv[])
     int probes = -1;
     int N = -1;
     double RANGE = -1.0;
-    if (argc == 1)
-    {
-        string input;
-        cout << "Please specify input file" << endl;
-        cin >> input;
-        FILE_NAME_INPUT = input;
-        cout << "Please specify query file" << endl;
-        cin >> input;
-        FILE_NAME_QUERY = input;
-        cout << "Please specify output file" << endl;
-        cin >> input;
-        FILE_NAME_LOG = input;
-    }
-    if (argc < 4 && argc != 1)
-    {
-        cout << "not appropriate number of arguments,programme will terminate " << endl;
-        exit(0);
-    }
+   
+    
     for (int i = 1; i < argc; i++)
     { //skip the name of the file
         if (strcmp(argv[i], "-i") == 0)
@@ -96,6 +76,21 @@ int main(int argc, char *argv[])
             RANGE = args_string_to_double(tempR);
         }
     }
+
+    if (FILE_NAME_INPUT == "NONE" && FILE_NAME_QUERY == "NONE" && FILE_NAME_LOG == "NONE")
+    {
+        string input;
+        cout << "Please specify input file" << endl;
+        cin >> input;
+        FILE_NAME_INPUT = input;
+        cout << "Please specify query file" << endl;
+        cin >> input;
+        FILE_NAME_QUERY = input;
+        cout << "Please specify output file" << endl;
+        cin >> input;
+        FILE_NAME_LOG = input;
+    }
+
     if (FILE_NAME_INPUT == "NONE" || FILE_NAME_QUERY == "NONE" || FILE_NAME_LOG == "NONE")
     {
         cout << "Not enough files specified: " << endl;

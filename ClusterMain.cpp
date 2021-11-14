@@ -22,11 +22,11 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    if (argc != 11)
-    {
-        cout << "Νot appropriate number of arguments, programme will terminate " << endl;
-        exit(0);
-    }
+    // if (argc != 11)
+    // {
+    //     cout << "Νot appropriate number of arguments, programme will terminate " << endl;
+    //     exit(0);
+    // }
     string FILE_NAME_INPUT = "NONE";
     string FILE_CONFIG = "NONE";
     string FILE_NAME_LOG = "NONE";
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     int probes = -1;                //number of probes
     int NUMBER_OF_HASH_TABLES = -1; //number_of_vector_hash_tables
     bool complete = false;
-    string assigner = "NONE"; //method
+    string assigner = "Classic"; //method
     for (int i = 1; i < argc; i++)
     { //skip the name of the file
         if (strcmp(argv[i], "-i") == 0)
@@ -83,6 +83,19 @@ int main(int argc, char *argv[])
                 exit(0);
             }
         }
+    }
+    if (FILE_NAME_INPUT == "NONE" && FILE_CONFIG == "NONE" && FILE_NAME_LOG == "NONE")
+    {
+        string input;
+        cout << "Please specify input file" << endl;
+        cin >> input;
+        FILE_NAME_INPUT = input;
+        cout << "Please specify configuration file" << endl;
+        cin >> input;
+        FILE_CONFIG = input;
+        cout << "Please specify output file" << endl;
+        cin >> input;
+        FILE_NAME_LOG = input;
     }
     if (FILE_NAME_INPUT == "NONE" || FILE_CONFIG == "NONE" || FILE_NAME_LOG == "NONE")
     {
@@ -139,44 +152,60 @@ int main(int argc, char *argv[])
             probes = value;
         }
     }
-    cout << "number_of_clusters: " << clusters << endl;
-    cout << "number_of_vector_hash_tables: " << NUMBER_OF_HASH_TABLES << endl;
-    cout << "number_of_vector_hash_functions: " << k_input << endl;
-    cout << "max_number_M_hypercube: " << M << endl;
-    cout << "number_of_hypercube_dimensions: " << kdim << endl;
-    cout << "number_of_probes: " << probes << endl;
+    if (clusters == -1){
+        cout<<"You need to specify clusters value. Programme will exit"<<endl;
+        exit(0);
+    }
+    if (NUMBER_OF_HASH_TABLES == -1)
+        NUMBER_OF_HASH_TABLES = 3; //PARAM <L>
+    if (k_input == -1)
+        k_input = 4; //PARAM <N>
+    if (M == -1)
+        M =10 ; //PARAM <radius>
+    if (kdim == -1)
+        kdim = 3; //PARAM 
+    if (probes == -1)
+        probes = 2; //PARAM 
 
-    //set up test logfile
-    //ofstream myLogFile;
-    bool justOnce = true;
-    int how_many_columns = 0;
-    int how_many_rows = 0;
-    int temp;
-    string mystring;
-    string tempString;
+        // cout << "number_of_clusters: " << clusters << endl;
+        // cout << "number_of_vector_hash_tables: " << NUMBER_OF_HASH_TABLES << endl;
+        // cout << "number_of_vector_hash_functions: " << k_input << endl;
+        // cout << "max_number_M_hypercube: " << M << endl;
+        // cout << "number_of_hypercube_dimensions: " << kdim << endl;
+        // cout << "number_of_probes: " << probes << endl;
 
-    myLogFile.open(FILE_NAME_LOG);
+        //set up test logfile
+        //ofstream myLogFile;
+        bool justOnce = true;
+        int how_many_columns = 0;
+        int how_many_rows = 0;
+        int temp;
+        string mystring;
+        string tempString;
 
-    ifstream myfile;
-    //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
-    myfile.open(FILE_NAME_INPUT);
-    how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
-    //how_many_rows++;
-    myfile.close();
-    myfile.clear();
-    myfile.open(FILE_NAME_INPUT);
-    if (myfile.is_open())
-    {
-        while (myfile)
+        myLogFile.open(FILE_NAME_LOG);
+
+        ifstream myfile;
+        //OPEN DATASET FILE TO COUNT NUMBER OF ROWS
+        myfile.open(FILE_NAME_INPUT);
+        how_many_rows = count(istreambuf_iterator<char>(myfile), istreambuf_iterator<char>(), '\n');
+        //how_many_rows++;
+        myfile.close();
+        myfile.clear();
+        myfile.open(FILE_NAME_INPUT);
+        if (myfile.is_open())
         {
-            getline(myfile, mystring);
-            stringstream sso(mystring);
-            sso >> temp;
-            while (justOnce && sso >> tempString)
+            while (myfile)
             {
-                how_many_columns++; //calculate the number of columns(dimension of the vector without the id)
-            }
-            justOnce = false;
+                getline(myfile, mystring);
+                stringstream sso(mystring);
+                sso >> temp;
+                while (justOnce && sso >> tempString)
+                {
+                    how_many_columns++; //calculate the number of columns(dimension of the vector without the id)
+                }
+                justOnce = false;
+                justOnce = false;
         }
     }
     myfile.close();
